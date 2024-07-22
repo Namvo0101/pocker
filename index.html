@@ -102,11 +102,11 @@
 
   // lock reload page
 window.addEventListener('beforeunload', function (e) {
-            // Cancel the event
-            e.preventDefault(); 
-            // Chrome requires returnValue to be set
-            e.returnValue = '';
-            return 'Are you sure you want to leave?';
+            // Modern browsers will not display the custom message
+            const confirmationMessage = 'Are you sure you want to leave?';
+
+            (e || window.event).returnValue = confirmationMessage; // For most browsers
+            return confirmationMessage; // For some older browsers
         });
   // end of lock reload page
   function setName(index) {
