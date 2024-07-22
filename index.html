@@ -99,6 +99,16 @@
 <button onclick="completeScores()">Complete</button>
 
 <script>
+
+  // lock reload page
+window.addEventListener('beforeunload', function (e) {
+            // Cancel the event
+            e.preventDefault(); 
+            // Chrome requires returnValue to be set
+            e.returnValue = '';
+            return 'Are you sure you want to leave?';
+        });
+  // end of lock reload page
   function setName(index) {
     var input = document.getElementById("name-" + index);
     var name = input.value;
