@@ -277,7 +277,6 @@
     var rowCount = table.rows.length;
     var error = false;
 
-    // keep input colors in sync
     applyColorsToAllScoreInputs();
 
     for (var i = 0; i < 4; i++) {
@@ -306,8 +305,8 @@
     if (error) alert("Nhập sai rồi bạn êyyyy ^_^");
   }
 
-  /* ==================== PDF FONT LOADER (attach to doc instance) ==================== */
-  let __pdfFontCache = null; // { regularB64, boldB64 }
+  /* ==================== PDF FONT LOADER ==================== */
+  let __pdfFontCache = null;
 
   function __arrayBufferToBase64(buffer) {
     let binary = "";
@@ -353,7 +352,7 @@
     doc.addFont("NotoSans-Bold.ttf", "NotoSans", "bold");
   }
 
-  /* ==================== EXPORT PDF (UPDATED timestamp placement) ==================== */
+  /* ==================== EXPORT PDF (Round # + fix TOTAL wrap) ==================== */
   async function exportPDF() {
     completeScores();
 
@@ -389,20 +388,22 @@
     doc.setFontSize(16);
     doc.text("—— Nam Vo ——", doc.internal.pageSize.getWidth() / 2, 50, { align: "center" });
 
-    // Table: 5 columns (check + 4 players)
-    const head = [["", names[0], names[1], names[2], names[3]]];
+    // Columns: # | check | p1 | p2 | p3 | p4
+    const head = [["#", "", names[0], names[1], names[2], names[3]]];
 
     const totals = [0, 1, 2, 3].map(i => document.getElementById("total-score-" + i).innerText);
 
     const body = [];
-    body.push(["TOTAL", totals[0], totals[1], totals[2], totals[3]]);
+    body.push(["", "TOTAL", totals[0], totals[1], totals[2], totals[3]]);
 
+    let round = 0;
     for (let r = 2; r < table.rows.length; r++) {
+      round += 1;
       const row = table.rows[r];
       const check = (row.cells[0].textContent || "").trim();
       const vals = [];
       for (let c = 1; c <= 4; c++) vals.push(String(parseInt(row.cells[c].firstChild.value) || 0));
-      body.push([check, vals[0], vals[1], vals[2], vals[3]]);
+      body.push([String(round), check, vals[0], vals[1], vals[2], vals[3]]);
     }
 
     function signColor(n) {
@@ -431,17 +432,26 @@
         textColor: 0
       },
       alternateRowStyles: { fillColor: [251, 251, 251] },
+
+      // make # column narrow, and keep TOTAL in one line by widening column 1
+      columnStyles: {
+        0: { cellWidth: 26 }, // #
+        1: { cellWidth: 48 }  // check / TOTAL (wider => no wrap)
+      },
+
       didParseCell: function (data) {
         const row = data.row;
         const col = data.column;
         const cell = data.cell;
 
-        // TOTAL row (body row 0)
+        // TOTAL row
         if (data.section === "body" && row.index === 0) {
           cell.styles.font = "NotoSans";
           cell.styles.fontStyle = "bold";
           cell.styles.fillColor = [247, 247, 247];
-          if (col.index >= 1) {
+
+          // Score columns are 2..5
+          if (col.index >= 2) {
             const n = parseInt(cell.raw, 10) || 0;
             cell.styles.textColor = signColor(n);
           } else {
@@ -449,25 +459,31 @@
           }
         }
 
-        // Data rows: color by sign
-        if (data.section === "body" && row.index >= 1 && col.index >= 1) {
+        // Data rows: score columns 2..5 colored by sign
+        if (data.section === "body" && row.index >= 1 && col.index >= 2) {
           const n = parseInt(cell.raw, 10) || 0;
           cell.styles.textColor = signColor(n);
         }
 
-        // Check column O/X
-        if (data.section === "body" && col.index === 0) {
+        // Check column is index 1: O/X color (TOTAL will be plain black)
+        if (data.section === "body" && col.index === 1) {
           const v = String(cell.raw || "").trim();
           cell.styles.font = "NotoSans";
           cell.styles.fontStyle = "bold";
+
           if (v === "O") cell.styles.textColor = [0, 128, 0];
           else if (v === "X") cell.styles.textColor = [204, 0, 0];
-          else cell.styles.textColor = [128, 128, 128];
+          else cell.styles.textColor = 0;
+        }
+
+        // # column neutral
+        if (data.section === "body" && col.index === 0) {
+          cell.styles.textColor = [128, 128, 128];
         }
       }
     });
 
-    // Timestamp: đặt ngay sau bảng, cách 2 dòng, căn phải + thêm "bởi Nam Võ"
+    // Timestamp: ngay sau bảng, cách 2 dòng, căn phải + "bởi Nam Võ"
     const now = new Date();
     const pad2 = (n) => String(n).padStart(2, "0");
     const stamp =
@@ -481,14 +497,10 @@
     const rightMargin = 40;
     const topMargin = 50;
 
-    // jsPDF-AutoTable exposes lastAutoTable.finalY
     const lastY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY : 80;
-
-    // "cách bảng 2 dòng"
     const lineHeight = 14;
     let y = lastY + (2 * lineHeight);
 
-    // nếu sắp vượt trang thì xuống trang mới
     if (y > pageH - 40) {
       doc.addPage();
       y = topMargin;
