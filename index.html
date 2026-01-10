@@ -2,104 +2,237 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title> Đánh bài cùng Bích Ngân ^_^ </title>
 <style>
-  body { 
-    text-align: center; 
-    margin: 0; 
-    padding: 0; 
-  }
-  #header {
-    font-size: 10px;
-    margin-top: 5px; 
-    margin-bottom: 5px;
-  }
-  table { 
-    margin: auto; 
-    border: 1px solid black; 
-    border-collapse: collapse; 
-    width: 90%;
-  }
-  th, td { 
-    padding: 5px; 
-    text-align: center; 
-    box-sizing: border-box;
-    word-wrap: break-word;
-  }
-  th { background-color: #f2f2f2; }
+  :root{
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --line: rgba(0,0,0,0.12);
+    --line-strong: rgba(0,0,0,0.22);
+    --text: #111827;
+    --muted: #6b7280;
 
-  input[type="number"], input[type="text"] { 
-    width: 20%;
-    box-sizing: border-box;
+    --ok-bg: rgba(16,185,129,0.08);
+    --err-bg: rgba(239,68,68,0.08);
+
+    --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    --shadow-sm: 0 6px 16px rgba(0,0,0,0.10);
+    --radius: 16px;
+  }
+
+  /* ✅ chặn overflow ngang */
+  * , *::before, *::after { box-sizing: border-box; }
+  html, body{
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: clip;
+  }
+  @supports not (overflow: clip){
+    html, body{ overflow-x: hidden; }
+  }
+
+  body{
     text-align: center;
+    padding: 14px 10px 26px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  }
+
+  #header{
+    font-size: 12px;
+    margin: 8px auto 12px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  .wrap{
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
+    overflow-x: clip;
+  }
+  @supports not (overflow: clip){
+    .wrap{ overflow-x: hidden; }
+  }
+
+  .table-card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 10px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .table-scroll{
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 0;
+  }
+
+  th, td{
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+
+  thead th{
+    background-color: #f3f4f6;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  tbody tr:nth-child(even){
+    background: rgba(0,0,0,0.02);
+  }
+
+  tbody tr.row-ok{
+    background: linear-gradient(0deg, var(--ok-bg), var(--ok-bg));
+  }
+  tbody tr.row-error{
+    background: linear-gradient(0deg, var(--err-bg), var(--err-bg));
+  }
+
+  tbody tr:hover{
+    filter: brightness(0.99);
+  }
+
+  input[type="number"], input[type="text"]{
+    width: 100%;
+    max-width: 220px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    outline: none;
+    background: #fff;
+    text-align: center;
+    font-size: 18px;
+    transition: box-shadow .15s ease, border-color .15s ease;
+  }
+
+  input[type="number"]:focus, input[type="text"]:focus{
+    border-color: rgba(59,130,246,0.55);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
   }
 
   .score-positive { color: green; }
   .score-negative { color: red; }
   .score-neutral  { color: grey; }
 
-  .check-positive { color: green; }
-  .check-negative { color: red; }
+  .check-positive { color: green; font-weight: 800; }
+  .check-negative { color: red; font-weight: 800; }
   .total-score { font-size: 24px; font-weight: bold; }
 
-  button {
-    margin-top: 10px;
-    font-size: 30px;
-    padding: 10px 20px;
+  .controls{
+    margin: 14px auto 0;
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+  }
+  .controls-row{
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
-  @media (max-width: 600px) {
-    .total-score { font-size: 18px; }
-    button { font-size: 30px; padding: 8px 16px; }
-    th, td { padding: 3px; }
+  button{
+    margin-top: 0;
+    font-size: 26px;
+    padding: 12px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
+    user-select: none;
   }
+  button:active{ transform: translateY(1px); }
+  button:hover{ filter: brightness(0.99); }
 
-  /* sticky header */
-  #scoreTable thead, #scoreTable thead th {
+  .btn-primary{ background: #111827; color: #fff; border-color: rgba(17,24,39,0.35); }
+  .btn-secondary{ background: #fff; color: #111827; }
+  .btn-danger{ background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.35); color: #991b1b; }
+  .btn-success{ background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); color: #065f46; }
+
+  #scoreTable thead, #scoreTable thead th{
     position: sticky;
     top: 0;
-    background-color: #f2f2f2;
     z-index: 10;
-    font-size: 30px;
+    font-size: 26px;
   }
 
-  /* Ẩn dòng Total trên web */
-  #scoreTable thead tr:nth-child(2) {
+  #scoreTable thead tr:nth-child(2){
     display: none;
+  }
+
+  @media (max-width: 600px){
+    body{ padding: 12px 8px 22px; }
+    #scoreTable thead, #scoreTable thead th { font-size: 20px; }
+    th, td { padding: 8px 6px; }
+    input[type="number"], input[type="text"]{ font-size: 16px; padding: 7px 8px; max-width: none; }
+    button { font-size: 22px; padding: 10px 14px; border-radius: 14px; }
+    .table-card{ box-shadow: none; }
+    button{ box-shadow: none; }
   }
 </style>
 </head>
 <body>
 
-<div id="header">------ Nam Vo ------</div>
+<div class="wrap">
+  <div id="header">------ Nam Vo ------</div>
 
-<table id="scoreTable">
-  <thead>
-    <tr>
-      <th></th>
-      <th><input type="text" id="name-0" value="Bích Ngân" onblur="setName(0)"></th>
-      <th><input type="text" id="name-1" value="Phương Nam" onblur="setName(1)"></th>
-      <th><input type="text" id="name-2" value="Cẩm Lệ" onblur="setName(2)"></th>
-      <th><input type="text" id="name-3" value="Nhật Nam" onblur="setName(3)"></th>
-    </tr>
+  <div class="table-card">
+    <div class="table-scroll">
+      <table id="scoreTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th><input type="text" id="name-0" value="Bích Ngân" onblur="setName(0)"></th>
+            <th><input type="text" id="name-1" value="Phương Nam" onblur="setName(1)"></th>
+            <th><input type="text" id="name-2" value="Cẩm Lệ" onblur="setName(2)"></th>
+            <th><input type="text" id="name-3" value="Nhật Nam" onblur="setName(3)"></th>
+          </tr>
 
-    <!-- vẫn giữ trong DOM để tính total/export, chỉ ẩn bằng CSS -->
-    <tr>
-      <td></td>
-      <td><span id="total-score-0" class="score-neutral total-score">0</span></td>
-      <td><span id="total-score-1" class="score-neutral total-score">0</span></td>
-      <td><span id="total-score-2" class="score-neutral total-score">0</span></td>
-      <td><span id="total-score-3" class="score-neutral total-score">0</span></td>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+          <tr>
+            <td></td>
+            <td><span id="total-score-0" class="score-neutral total-score">0</span></td>
+            <td><span id="total-score-1" class="score-neutral total-score">0</span></td>
+            <td><span id="total-score-2" class="score-neutral total-score">0</span></td>
+            <td><span id="total-score-3" class="score-neutral total-score">0</span></td>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-<button onclick="enterPoints()">Enter Points</button>
-<button onclick="completeScores()">Complete</button>
-<br>
-<button onclick="resetGame()">Reset</button>
-<button onclick="exportPDF()">Export PDF</button>
+  <div class="controls">
+    <div class="controls-row">
+      <button class="btn-secondary" onclick="enterPoints()">Enter Points</button>
+      <button class="btn-primary" onclick="completeScores()">Complete</button>
+    </div>
+    <div class="controls-row">
+      <button class="btn-danger" onclick="resetGame()">Reset</button>
+      <button class="btn-success" onclick="exportPDF()">Export PDF</button>
+    </div>
+  </div>
+</div>
 
 <!-- PDF libs (local) -->
 <script src="./libs/jspdf.umd.min.js"></script>
@@ -107,14 +240,10 @@
 
 <script>
   var STORAGE_KEY = "scoreTable_save_v1";
-
-  // ✅ FIX: chặn save khi đang reset (để beforeunload không ghi lại dữ liệu cũ)
   var __isResetting = false;
 
-  /* ================== version_5: live sign color for each input ================== */
   function applySignColorToInput(input) {
     input.classList.remove("score-positive", "score-negative", "score-neutral");
-
     var raw = (input.value || "").trim();
     var n = parseInt(raw, 10);
 
@@ -147,9 +276,8 @@
     }
   }
 
-  /* ==================== SAVE/LOAD ==================== */
   function saveGame() {
-    if (__isResetting) return; // ✅ FIX
+    if (__isResetting) return;
 
     var table = document.getElementById("scoreTable");
     var data = { headers: [], rows: [] };
@@ -190,7 +318,6 @@
     var table = document.getElementById("scoreTable");
     var trimmed = String(raw).trim();
 
-    // JSON format
     if (trimmed[0] === "{") {
       try {
         var data = JSON.parse(trimmed);
@@ -229,36 +356,14 @@
       } catch (e) {}
     }
 
-    // HTML fallback
-    if (trimmed[0] === "<" && trimmed.toLowerCase().indexOf("<table") !== -1) {
-      try {
-        var wrapper = document.createElement("div");
-        wrapper.innerHTML = trimmed;
-        var newTable = wrapper.querySelector("table");
-        if (newTable && newTable.id === "scoreTable") {
-          table.replaceWith(newTable);
-          attachAutoSaveToExistingInputs();
-          completeScores();
-          saveGame();
-          return;
-        }
-      } catch (e2) {}
-    }
-
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  /* ==================== CORE ==================== */
   function resetGame() {
     if (!confirm("Bạn có chắc muốn reset để tạo game mới và xoá hết dữ liệu cũ không?")) return;
-
-    __isResetting = true;            // ✅ FIX: bật cờ trước
+    __isResetting = true;
     localStorage.removeItem(STORAGE_KEY);
-
-    // ✅ FIX: reload sau 1 tick để chắc chắn removeItem xong và tránh race
-    setTimeout(function() {
-      location.reload();
-    }, 0);
+    setTimeout(function(){ location.reload(); }, 0);
   }
 
   function setName(index) {
@@ -307,9 +412,18 @@
         var cell = row.cells[colIdx].firstChild;
         rowSum += parseInt(cell.value) || 0;
       }
+
+      row.classList.remove("row-ok", "row-error");
+
       var checkCell = row.cells[0];
-      if (rowSum === 0) checkCell.innerHTML = '<span class="check-positive">O</span>';
-      else { checkCell.innerHTML = '<span class="check-negative">X</span>'; error = true; }
+      if (rowSum === 0) {
+        checkCell.innerHTML = '<span class="check-positive">O</span>';
+        row.classList.add("row-ok");
+      } else {
+        checkCell.innerHTML = '<span class="check-negative">X</span>';
+        row.classList.add("row-error");
+        error = true;
+      }
     }
 
     saveGame();
@@ -363,7 +477,7 @@
     doc.addFont("NotoSans-Bold.ttf", "NotoSans", "bold");
   }
 
-  /* ==================== EXPORT PDF (Round # + TOTAL no-wrap) ==================== */
+  /* ==================== EXPORT PDF ==================== */
   async function exportPDF() {
     completeScores();
 
@@ -441,12 +555,7 @@
         textColor: 0
       },
       alternateRowStyles: { fillColor: [251, 251, 251] },
-
-      columnStyles: {
-        0: { cellWidth: 26 },
-        1: { cellWidth: 48 }
-      },
-
+      columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 48 } },
       didParseCell: function (data) {
         const row = data.row;
         const col = data.column;
@@ -474,7 +583,6 @@
           const v = String(cell.raw || "").trim();
           cell.styles.font = "NotoSans";
           cell.styles.fontStyle = "bold";
-
           if (v === "O") cell.styles.textColor = [0, 128, 0];
           else if (v === "X") cell.styles.textColor = [204, 0, 0];
           else cell.styles.textColor = 0;
@@ -526,7 +634,6 @@
     attachAutoSaveToExistingInputs();
   });
 
-  // ✅ FIX: prevent re-saving old data during reset reload
   window.addEventListener("beforeunload", function() {
     if (!__isResetting) saveGame();
   });
