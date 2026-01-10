@@ -97,8 +97,8 @@
 
 <button onclick="enterPoints()">Enter Points</button>
 <button onclick="completeScores()">Complete</button>
-<button onclick="resetGame()">Reset</button>
 <br>
+<button onclick="resetGame()">Reset</button>
 <button onclick="exportPDF()">Export PDF</button>
 
 <!-- PDF libs (local) -->
@@ -107,6 +107,9 @@
 
 <script>
   var STORAGE_KEY = "scoreTable_save_v1";
+
+  // ✅ FIX: chặn save khi đang reset (để beforeunload không ghi lại dữ liệu cũ)
+  var __isResetting = false;
 
   /* ================== version_5: live sign color for each input ================== */
   function applySignColorToInput(input) {
@@ -146,6 +149,8 @@
 
   /* ==================== SAVE/LOAD ==================== */
   function saveGame() {
+    if (__isResetting) return; // ✅ FIX
+
     var table = document.getElementById("scoreTable");
     var data = { headers: [], rows: [] };
 
@@ -246,8 +251,14 @@
   /* ==================== CORE ==================== */
   function resetGame() {
     if (!confirm("Bạn có chắc muốn reset để tạo game mới và xoá hết dữ liệu cũ không?")) return;
+
+    __isResetting = true;            // ✅ FIX: bật cờ trước
     localStorage.removeItem(STORAGE_KEY);
-    location.reload();
+
+    // ✅ FIX: reload sau 1 tick để chắc chắn removeItem xong và tránh race
+    setTimeout(function() {
+      location.reload();
+    }, 0);
   }
 
   function setName(index) {
@@ -352,7 +363,7 @@
     doc.addFont("NotoSans-Bold.ttf", "NotoSans", "bold");
   }
 
-  /* ==================== EXPORT PDF (Round # + fix TOTAL wrap) ==================== */
+  /* ==================== EXPORT PDF (Round # + TOTAL no-wrap) ==================== */
   async function exportPDF() {
     completeScores();
 
@@ -383,12 +394,10 @@
 
     const names = [0, 1, 2, 3].map(getPlayerName);
 
-    // Header
     doc.setFont("NotoSans", "bold");
     doc.setFontSize(16);
     doc.text("—— Nam Vo ——", doc.internal.pageSize.getWidth() / 2, 50, { align: "center" });
 
-    // Columns: # | check | p1 | p2 | p3 | p4
     const head = [["#", "", names[0], names[1], names[2], names[3]]];
 
     const totals = [0, 1, 2, 3].map(i => document.getElementById("total-score-" + i).innerText);
@@ -433,10 +442,9 @@
       },
       alternateRowStyles: { fillColor: [251, 251, 251] },
 
-      // make # column narrow, and keep TOTAL in one line by widening column 1
       columnStyles: {
-        0: { cellWidth: 26 }, // #
-        1: { cellWidth: 48 }  // check / TOTAL (wider => no wrap)
+        0: { cellWidth: 26 },
+        1: { cellWidth: 48 }
       },
 
       didParseCell: function (data) {
@@ -444,13 +452,11 @@
         const col = data.column;
         const cell = data.cell;
 
-        // TOTAL row
         if (data.section === "body" && row.index === 0) {
           cell.styles.font = "NotoSans";
           cell.styles.fontStyle = "bold";
           cell.styles.fillColor = [247, 247, 247];
 
-          // Score columns are 2..5
           if (col.index >= 2) {
             const n = parseInt(cell.raw, 10) || 0;
             cell.styles.textColor = signColor(n);
@@ -459,13 +465,11 @@
           }
         }
 
-        // Data rows: score columns 2..5 colored by sign
         if (data.section === "body" && row.index >= 1 && col.index >= 2) {
           const n = parseInt(cell.raw, 10) || 0;
           cell.styles.textColor = signColor(n);
         }
 
-        // Check column is index 1: O/X color (TOTAL will be plain black)
         if (data.section === "body" && col.index === 1) {
           const v = String(cell.raw || "").trim();
           cell.styles.font = "NotoSans";
@@ -476,14 +480,12 @@
           else cell.styles.textColor = 0;
         }
 
-        // # column neutral
         if (data.section === "body" && col.index === 0) {
           cell.styles.textColor = [128, 128, 128];
         }
       }
     });
 
-    // Timestamp: ngay sau bảng, cách 2 dòng, căn phải + "bởi Nam Võ"
     const now = new Date();
     const pad2 = (n) => String(n).padStart(2, "0");
     const stamp =
@@ -524,7 +526,10 @@
     attachAutoSaveToExistingInputs();
   });
 
-  window.addEventListener("beforeunload", saveGame);
+  // ✅ FIX: prevent re-saving old data during reset reload
+  window.addEventListener("beforeunload", function() {
+    if (!__isResetting) saveGame();
+  });
 </script>
 
 </body>
