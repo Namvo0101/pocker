@@ -20,8 +20,8 @@
     --shadow-sm: 0 6px 16px rgba(0,0,0,0.10);
     --radius: 16px;
 
-    /* ✅ NEW: width cột check */
-    --check-col: 44px; /* chỉnh 40~52 tuỳ thích */
+    /* width cột check */
+    --check-col: 44px;
   }
 
   * , *::before, *::after { box-sizing: border-box; }
@@ -82,7 +82,7 @@
   table{
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;   /* ✅ giúp chia đều phần còn lại */
+    table-layout: fixed;
     min-width: 0;
   }
 
@@ -98,7 +98,24 @@
     border-bottom: 1px solid var(--line-strong);
   }
 
-  /* ✅ NEW: cột check chỉ vừa đủ O/X */
+  /* ✅ NEW: Tên không xuống dòng + KHÔNG hiện "..." */
+  #scoreTable thead th{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;                 /* was ellipsis -> clip (không có "...") */
+    font-size: clamp(12px, 2.8vw, 22px); /* chữ header tự co */
+    padding: 8px 6px;                    /* gọn hơn để có thêm chiều ngang */
+  }
+  #scoreTable thead th input[type="text"]{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;                 /* không có "..." */
+    font-size: inherit;
+    padding: 6px 6px;                    /* gọn hơn */
+    max-width: none;                     /* luôn full theo cell */
+  }
+
+  /* cột check vừa đủ O/X */
   #scoreTable th:first-child,
   #scoreTable td:first-child{
     width: var(--check-col);
@@ -108,7 +125,6 @@
     padding-right: 6px;
   }
 
-  /* zebra */
   tbody tr:nth-child(even){
     background: rgba(0,0,0,0.02);
   }
@@ -146,7 +162,6 @@
   .score-negative { color: red; }
   .score-neutral  { color: grey; }
 
-  /* ✅ NEW: O/X gọn, không “phình” cột */
   .check-positive, .check-negative{
     display: inline-block;
     width: 1.2em;
@@ -197,7 +212,6 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    font-size: 26px;
   }
 
   /* Ẩn dòng Total trên web */
@@ -207,16 +221,18 @@
 
   @media (max-width: 600px){
     body{ padding: 12px 8px 22px; }
-    #scoreTable thead, #scoreTable thead th { font-size: 20px; }
     th, td { padding: 8px 6px; }
     input[type="number"], input[type="text"]{ font-size: 16px; padding: 7px 8px; max-width: none; }
     button { font-size: 22px; padding: 10px 14px; border-radius: 14px; }
     .table-card{ box-shadow: none; }
     button{ box-shadow: none; }
 
-    /* ✅ NEW: cột check nhỏ hơn trên mobile */
     :root{ --check-col: 36px; }
     .check-positive, .check-negative{ font-size: 20px; }
+
+    /* thêm chút không gian ngang cho header trên mobile */
+    #scoreTable thead th{ padding: 6px 4px; }
+    #scoreTable thead th input[type="text"]{ padding: 6px 4px; }
   }
 </style>
 </head>
