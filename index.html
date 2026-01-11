@@ -19,9 +19,11 @@
     --shadow: 0 10px 30px rgba(0,0,0,0.08);
     --shadow-sm: 0 6px 16px rgba(0,0,0,0.10);
     --radius: 16px;
+
+    /* ✅ NEW: width cột check */
+    --check-col: 44px; /* chỉnh 40~52 tuỳ thích */
   }
 
-  /* ✅ chặn overflow ngang */
   * , *::before, *::after { box-sizing: border-box; }
   html, body{
     width: 100%;
@@ -80,7 +82,7 @@
   table{
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: fixed;   /* ✅ giúp chia đều phần còn lại */
     min-width: 0;
   }
 
@@ -96,6 +98,17 @@
     border-bottom: 1px solid var(--line-strong);
   }
 
+  /* ✅ NEW: cột check chỉ vừa đủ O/X */
+  #scoreTable th:first-child,
+  #scoreTable td:first-child{
+    width: var(--check-col);
+    min-width: var(--check-col);
+    max-width: var(--check-col);
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  /* zebra */
   tbody tr:nth-child(even){
     background: rgba(0,0,0,0.02);
   }
@@ -133,8 +146,18 @@
   .score-negative { color: red; }
   .score-neutral  { color: grey; }
 
-  .check-positive { color: green; font-weight: 800; }
-  .check-negative { color: red; font-weight: 800; }
+  /* ✅ NEW: O/X gọn, không “phình” cột */
+  .check-positive, .check-negative{
+    display: inline-block;
+    width: 1.2em;
+    text-align: center;
+    font-weight: 800;
+    line-height: 1;
+    font-size: 22px;
+  }
+  .check-positive { color: green; }
+  .check-negative { color: red; }
+
   .total-score { font-size: 24px; font-weight: bold; }
 
   .controls{
@@ -177,6 +200,7 @@
     font-size: 26px;
   }
 
+  /* Ẩn dòng Total trên web */
   #scoreTable thead tr:nth-child(2){
     display: none;
   }
@@ -189,6 +213,10 @@
     button { font-size: 22px; padding: 10px 14px; border-radius: 14px; }
     .table-card{ box-shadow: none; }
     button{ box-shadow: none; }
+
+    /* ✅ NEW: cột check nhỏ hơn trên mobile */
+    :root{ --check-col: 36px; }
+    .check-positive, .check-negative{ font-size: 20px; }
   }
 </style>
 </head>
