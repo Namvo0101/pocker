@@ -20,8 +20,12 @@
     --shadow-sm: 0 6px 16px rgba(0,0,0,0.10);
     --radius: 16px;
 
-    /* width cột check */
     --check-col: 44px;
+    --topbar-pad: 10px;
+
+    --chip-bg: #f3f4f6;
+    --chip-border: rgba(0,0,0,0.16);
+    --chip-fixed: #6d28d9;
   }
 
   * , *::before, *::after { box-sizing: border-box; }
@@ -38,28 +42,125 @@
 
   body{
     text-align: center;
-    padding: 14px 10px 26px;
     background: var(--bg);
     color: var(--text);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   }
 
+  /* ===== Fixed Topbar ===== */
+  .topbar{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: var(--bg);
+    padding: var(--topbar-pad) 10px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topbar-inner{
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
   #header{
     font-size: 12px;
-    margin: 8px auto 12px;
+    margin: 0 auto 8px;
     color: var(--muted);
     letter-spacing: 0.12em;
   }
 
+  .namebar-card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 8px;
+    overflow: visible;
+  }
+
+  .namebar-scroll{
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* ✅ Grid thẳng hàng với bảng: check + 4 cột */
+  .namegrid{
+    display: grid;
+    grid-template-columns: var(--check-col) repeat(4, 1fr);
+    gap: 8px;
+    align-items: stretch;           /* ✅ các ô tự stretch cùng chiều cao */
+    width: 100%;
+    min-width: 0;
+  }
+
+  .namegrid .spacer{
+    width: 100%;
+  }
+
+  /* ✅ Ô tên: cho phép xuống dòng + chữ to hơn */
+  .namechip{
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-border);
+    border-radius: 16px;
+    padding: 8px 10px;
+    width: 100%;
+    height: 100%;                  /* ✅ bằng nhau về chiều cao */
+    min-height: 44px;              /* ✅ tối thiểu đẹp */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    /* ✅ cho phép wrap */
+    white-space: normal;
+    overflow: visible;
+    word-break: break-word;
+    line-height: 1.15;
+
+    font-size: clamp(14px, 3.2vw, 20px); /* ✅ to hơn */
+    font-family: inherit;
+  }
+
+  /* input tên vẫn 1 dòng khi đang sửa (bình thường) */
+  .namechip input[type="text"]{
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    text-align: center;
+    font-size: inherit;
+    padding: 0;
+    font-family: inherit;
+  }
+
+  /* ✅ Khi fix tên: đậm + tím + cho phép wrap */
+  .name-fixed{
+    font-weight: 800;
+    color: var(--chip-fixed);
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-family: inherit;
+
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.15;
+  }
+
+  /* Wrap content */
   .wrap{
     max-width: 980px;
     width: 100%;
     margin: 0 auto;
-    overflow-x: clip;
+    padding: 0 10px 26px;
   }
-  @supports not (overflow: clip){
-    .wrap{ overflow-x: hidden; }
-  }
+
+  .spacer-top{ height: 140px; } /* JS auto set */
 
   .table-card{
     background: var(--card);
@@ -84,6 +185,7 @@
     border-collapse: collapse;
     table-layout: fixed;
     min-width: 0;
+    background: var(--card);
   }
 
   th, td{
@@ -94,28 +196,12 @@
   }
 
   thead th{
-    background-color: #f3f4f6;
+    background: #f3f4f6;
     border-bottom: 1px solid var(--line-strong);
+    font-size: 14px;
+    color: var(--muted);
   }
 
-  /* ✅ NEW: Tên không xuống dòng + KHÔNG hiện "..." */
-  #scoreTable thead th{
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: clip;                 /* was ellipsis -> clip (không có "...") */
-    font-size: clamp(12px, 2.8vw, 22px); /* chữ header tự co */
-    padding: 8px 6px;                    /* gọn hơn để có thêm chiều ngang */
-  }
-  #scoreTable thead th input[type="text"]{
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: clip;                 /* không có "..." */
-    font-size: inherit;
-    padding: 6px 6px;                    /* gọn hơn */
-    max-width: none;                     /* luôn full theo cell */
-  }
-
-  /* cột check vừa đủ O/X */
   #scoreTable th:first-child,
   #scoreTable td:first-child{
     width: var(--check-col);
@@ -125,24 +211,13 @@
     padding-right: 6px;
   }
 
-  tbody tr:nth-child(even){
-    background: rgba(0,0,0,0.02);
-  }
+  tbody tr:nth-child(even){ background: rgba(0,0,0,0.02); }
+  tbody tr.row-ok{ background: linear-gradient(0deg, var(--ok-bg), var(--ok-bg)); }
+  tbody tr.row-error{ background: linear-gradient(0deg, var(--err-bg), var(--err-bg)); }
 
-  tbody tr.row-ok{
-    background: linear-gradient(0deg, var(--ok-bg), var(--ok-bg));
-  }
-  tbody tr.row-error{
-    background: linear-gradient(0deg, var(--err-bg), var(--err-bg));
-  }
-
-  tbody tr:hover{
-    filter: brightness(0.99);
-  }
-
-  input[type="number"], input[type="text"]{
+  input[type="number"]{
     width: 100%;
-    max-width: 220px;
+    max-width: none;
     padding: 8px 10px;
     border-radius: 12px;
     border: 1px solid var(--line);
@@ -151,9 +226,9 @@
     text-align: center;
     font-size: 18px;
     transition: box-shadow .15s ease, border-color .15s ease;
+    font-family: inherit;
   }
-
-  input[type="number"]:focus, input[type="text"]:focus{
+  input[type="number"]:focus{
     border-color: rgba(59,130,246,0.55);
     box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
   }
@@ -172,8 +247,6 @@
   }
   .check-positive { color: green; }
   .check-negative { color: red; }
-
-  .total-score { font-size: 24px; font-weight: bold; }
 
   .controls{
     margin: 14px auto 0;
@@ -199,6 +272,7 @@
     cursor: pointer;
     transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
     user-select: none;
+    font-family: inherit;
   }
   button:active{ transform: translateY(1px); }
   button:hover{ filter: brightness(0.99); }
@@ -208,38 +282,50 @@
   .btn-danger{ background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.35); color: #991b1b; }
   .btn-success{ background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); color: #065f46; }
 
-  #scoreTable thead, #scoreTable thead th{
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  /* Ẩn dòng Total trên web */
-  #scoreTable thead tr:nth-child(2){
-    display: none;
-  }
-
   @media (max-width: 600px){
-    body{ padding: 12px 8px 22px; }
-    th, td { padding: 8px 6px; }
-    input[type="number"], input[type="text"]{ font-size: 16px; padding: 7px 8px; max-width: none; }
-    button { font-size: 22px; padding: 10px 14px; border-radius: 14px; }
-    .table-card{ box-shadow: none; }
-    button{ box-shadow: none; }
-
     :root{ --check-col: 36px; }
+    input[type="number"]{ font-size: 16px; padding: 7px 8px; }
+    button { font-size: 22px; padding: 10px 14px; border-radius: 14px; box-shadow: none; }
+    .table-card{ box-shadow: none; }
+    .namebar-card{ box-shadow: none; }
     .check-positive, .check-negative{ font-size: 20px; }
-
-    /* thêm chút không gian ngang cho header trên mobile */
-    #scoreTable thead th{ padding: 6px 4px; }
-    #scoreTable thead th input[type="text"]{ padding: 6px 4px; }
+    .namegrid{ gap: 6px; }
+    .namechip{ padding: 7px 8px; min-height: 40px; font-size: clamp(13px, 3.4vw, 18px); }
   }
 </style>
 </head>
 <body>
 
+<div class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <div id="header">------ Nam Vo ------</div>
+
+    <div class="namebar-card">
+      <div class="namebar-scroll">
+        <div class="namegrid">
+          <div class="spacer"></div>
+
+          <div class="namechip" id="namecell-0">
+            <input type="text" id="name-0" value="Bích Ngân" onblur="setName(0)">
+          </div>
+          <div class="namechip" id="namecell-1">
+            <input type="text" id="name-1" value="Phương Nam" onblur="setName(1)">
+          </div>
+          <div class="namechip" id="namecell-2">
+            <input type="text" id="name-2" value="Cẩm Lệ" onblur="setName(2)">
+          </div>
+          <div class="namechip" id="namecell-3">
+            <input type="text" id="name-3" value="Nhật Nam" onblur="setName(3)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div class="wrap">
-  <div id="header">------ Nam Vo ------</div>
+  <div class="spacer-top" id="spacerTop"></div>
 
   <div class="table-card">
     <div class="table-scroll">
@@ -247,13 +333,9 @@
         <thead>
           <tr>
             <th></th>
-            <th><input type="text" id="name-0" value="Bích Ngân" onblur="setName(0)"></th>
-            <th><input type="text" id="name-1" value="Phương Nam" onblur="setName(1)"></th>
-            <th><input type="text" id="name-2" value="Cẩm Lệ" onblur="setName(2)"></th>
-            <th><input type="text" id="name-3" value="Nhật Nam" onblur="setName(3)"></th>
+            <th></th><th></th><th></th><th></th>
           </tr>
-
-          <tr>
+          <tr style="display:none;">
             <td></td>
             <td><span id="total-score-0" class="score-neutral total-score">0</span></td>
             <td><span id="total-score-1" class="score-neutral total-score">0</span></td>
@@ -278,13 +360,56 @@
   </div>
 </div>
 
-<!-- PDF libs (local) -->
 <script src="./libs/jspdf.umd.min.js"></script>
 <script src="./libs/jspdf.plugin.autotable.min.js"></script>
 
 <script>
   var STORAGE_KEY = "scoreTable_save_v1";
   var __isResetting = false;
+
+  var MASTER_PASSWORD = "vophuongnam";
+  var PASSWORD_KEY = STORAGE_KEY + "_pwd";
+
+  function isNewGame() { return !localStorage.getItem(STORAGE_KEY); }
+
+  function initPasswordIfNewGame() {
+    if (!isNewGame()) return;
+    if (localStorage.getItem(PASSWORD_KEY)) return;
+
+    var pwd = prompt("Khởi tạo mật khẩu cho ván chơi.");
+    if (pwd === null) return;
+
+    pwd = String(pwd).trim();
+    if (!pwd) { alert("Mật khẩu không được để trống."); return; }
+    localStorage.setItem(PASSWORD_KEY, pwd);
+  }
+
+  function requirePasswordForExport() {
+    var entered = prompt("Nhập mật khẩu để xuất PDF.");
+    if (entered === null) return false;
+
+    entered = String(entered).trim();
+    var gamePwd = localStorage.getItem(PASSWORD_KEY) || "";
+
+    if (entered === gamePwd || entered === MASTER_PASSWORD) return true;
+    alert("Mật khẩu sai.");
+    return false;
+  }
+
+  function syncTopSpacer() {
+    var topbar = document.getElementById("topbar");
+    var spacer = document.getElementById("spacerTop");
+    spacer.style.height = (topbar.offsetHeight + 12) + "px";
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
 
   function applySignColorToInput(input) {
     input.classList.remove("score-positive", "score-negative", "score-neutral");
@@ -314,9 +439,7 @@
   function applyColorsToAllScoreInputs() {
     for (var i = 0; i < 4; i++) {
       var inputs = document.getElementsByClassName("score-input-" + i);
-      Array.from(inputs).forEach(function(inp) {
-        applySignColorToInput(inp);
-      });
+      Array.from(inputs).forEach(function(inp) { applySignColorToInput(inp); });
     }
   }
 
@@ -327,10 +450,10 @@
     var data = { headers: [], rows: [] };
 
     for (var i = 0; i < 4; i++) {
-      var th = table.rows[0].cells[i + 1];
-      var input = th.querySelector("input");
+      var cell = document.getElementById("namecell-" + i);
+      var input = cell ? cell.querySelector("input") : null;
       if (input) data.headers.push({ isInput: true, value: input.value });
-      else data.headers.push({ isInput: false, value: th.innerHTML });
+      else data.headers.push({ isInput: false, value: cell ? cell.innerHTML : "" });
     }
 
     for (var r = 2; r < table.rows.length; r++) {
@@ -346,76 +469,70 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 
-  function attachAutoSaveToExistingInputs() {
-    for (var i = 0; i < 4; i++) {
-      var inputs = document.getElementsByClassName("score-input-" + i);
-      Array.from(inputs).forEach(function(inp) {
-        bindScoreInput(inp);
-      });
-    }
-  }
-
   function loadGame() {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
 
-    var table = document.getElementById("scoreTable");
     var trimmed = String(raw).trim();
+    if (trimmed[0] !== "{") return;
 
-    if (trimmed[0] === "{") {
-      try {
-        var data = JSON.parse(trimmed);
-        if (data && data.headers && data.rows) {
-          for (var i = 0; i < 4; i++) {
-            var th = table.rows[0].cells[i + 1];
-            var h = data.headers[i];
-            if (h && h.isInput) {
-              th.innerHTML = '<input type="text" id="name-' + i + '" value="' + (h.value || "") + '" onblur="setName(' + i + ')">';
-            } else {
-              th.innerHTML = (h && h.value != null) ? h.value : th.innerHTML;
-            }
-          }
+    try {
+      var data = JSON.parse(trimmed);
+      if (!(data && data.headers && data.rows)) return;
 
-          while (table.rows.length > 2) table.deleteRow(-1);
+      for (var i = 0; i < 4; i++) {
+        var wrap = document.getElementById("namecell-" + i);
+        var h = data.headers[i];
 
-          if (data.rows && data.rows.length) {
-            data.rows.forEach(function(r) {
-              var row = table.insertRow(-1);
-              var checkCell = row.insertCell(0);
-              checkCell.innerHTML = r.check || '';
-
-              for (var i = 1; i <= 4; i++) {
-                var cell = row.insertCell(i);
-                cell.innerHTML = '<input type="number" class="score-input-' + (i - 1) + '">';
-                var inp = cell.firstChild;
-                inp.value = (r.scores && r.scores[i - 1] != null) ? r.scores[i - 1] : "";
-                bindScoreInput(inp);
-              }
-            });
-          }
-
-          completeScores();
-          return;
+        if (wrap && h && h.isInput) {
+          wrap.innerHTML = '<input type="text" id="name-' + i + '" value="' + escapeHtml(h.value || "") + '" onblur="setName(' + i + ')">';
+        } else if (wrap) {
+          wrap.innerHTML = (h && h.value != null) ? h.value : wrap.innerHTML;
         }
-      } catch (e) {}
-    }
+      }
 
-    localStorage.removeItem(STORAGE_KEY);
-  }
+      var table = document.getElementById("scoreTable");
+      while (table.rows.length > 2) table.deleteRow(-1);
 
-  function resetGame() {
-    if (!confirm("Bạn có chắc muốn reset để tạo game mới và xoá hết dữ liệu cũ không?")) return;
-    __isResetting = true;
-    localStorage.removeItem(STORAGE_KEY);
-    setTimeout(function(){ location.reload(); }, 0);
+      if (data.rows && data.rows.length) {
+        data.rows.forEach(function(r) {
+          var row = table.insertRow(-1);
+          var checkCell = row.insertCell(0);
+          checkCell.innerHTML = r.check || '';
+
+          for (var i = 1; i <= 4; i++) {
+            var cell = row.insertCell(i);
+            cell.innerHTML = '<input type="number" class="score-input-' + (i - 1) + '">';
+            var inp = cell.firstChild;
+            inp.value = (r.scores && r.scores[i - 1] != null) ? r.scores[i - 1] : "";
+            bindScoreInput(inp);
+          }
+        });
+      }
+
+      completeScores();
+    } catch (e) {}
   }
 
   function setName(index) {
     var input = document.getElementById("name-" + index);
     var name = input.value;
-    var th = input.parentElement;
-    th.innerHTML = name;
+    var wrap = document.getElementById("namecell-" + index);
+
+    wrap.innerHTML = '<span class="name-fixed">' + escapeHtml(name) + '</span>';
+
     saveGame();
+    syncTopSpacer();
+  }
+
+  function resetGame() {
+    if (!confirm("Bạn có chắc muốn reset để tạo game mới và xoá hết dữ liệu cũ không?")) return;
+    __isResetting = true;
+
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(PASSWORD_KEY);
+
+    setTimeout(function(){ location.reload(); }, 0);
   }
 
   function enterPoints() {
@@ -474,7 +591,7 @@
     if (error) alert("Nhập sai rồi bạn êyyyy ^_^");
   }
 
-  /* ==================== PDF FONT LOADER ==================== */
+  /* ===== PDF (giữ nguyên logic) ===== */
   let __pdfFontCache = null;
 
   function __arrayBufferToBase64(buffer) {
@@ -494,14 +611,8 @@
     const boldUrl = "./fonts/NotoSans-Bold.ttf";
 
     const [regBuf, boldBuf] = await Promise.all([
-      fetch(regularUrl).then(r => {
-        if (!r.ok) throw new Error("Không tải được font: " + regularUrl);
-        return r.arrayBuffer();
-      }),
-      fetch(boldUrl).then(r => {
-        if (!r.ok) throw new Error("Không tải được font: " + boldUrl);
-        return r.arrayBuffer();
-      })
+      fetch(regularUrl).then(r => { if (!r.ok) throw new Error(); return r.arrayBuffer(); }),
+      fetch(boldUrl).then(r => { if (!r.ok) throw new Error(); return r.arrayBuffer(); })
     ]);
 
     __pdfFontCache = {
@@ -513,56 +624,40 @@
 
   async function __attachVietnameseFontsToDoc(doc) {
     const cache = await __getPdfFontCache();
-
     doc.addFileToVFS("NotoSans-Regular.ttf", cache.regularB64);
     doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
-
     doc.addFileToVFS("NotoSans-Bold.ttf", cache.boldB64);
     doc.addFont("NotoSans-Bold.ttf", "NotoSans", "bold");
   }
 
-  /* ==================== EXPORT PDF ==================== */
-  async function exportPDF() {
+  async function doExportPDF() {
     completeScores();
-
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert("Chưa load được thư viện jsPDF.\nHãy kiểm tra:\n/libs/jspdf.umd.min.js\n/libs/jspdf.plugin.autotable.min.js");
-      return;
-    }
+    if (!window.jspdf || !window.jspdf.jsPDF) return;
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-
-    try {
-      await __attachVietnameseFontsToDoc(doc);
-    } catch (e) {
-      alert("Lỗi load font PDF: " + (e && e.message ? e.message : e));
-      return;
-    }
-
-    const table = document.getElementById("scoreTable");
+    await __attachVietnameseFontsToDoc(doc);
 
     function getPlayerName(i) {
-      const cell = table.rows[0] && table.rows[0].cells[i + 1];
+      var cell = document.getElementById("namecell-" + i);
       if (!cell) return "";
-      const inp = cell.querySelector("input");
-      const v = inp ? inp.value : (cell.textContent || "");
+      var inp = cell.querySelector("input");
+      var v = inp ? inp.value : (cell.textContent || "");
       return String(v || "").trim();
     }
-
-    const names = [0, 1, 2, 3].map(getPlayerName);
+    const names = [0,1,2,3].map(getPlayerName);
 
     doc.setFont("NotoSans", "bold");
     doc.setFontSize(16);
     doc.text("—— Nam Vo ——", doc.internal.pageSize.getWidth() / 2, 50, { align: "center" });
 
     const head = [["#", "", names[0], names[1], names[2], names[3]]];
-
-    const totals = [0, 1, 2, 3].map(i => document.getElementById("total-score-" + i).innerText);
+    const totals = [0,1,2,3].map(i => document.getElementById("total-score-" + i).innerText);
 
     const body = [];
     body.push(["", "TOTAL", totals[0], totals[1], totals[2], totals[3]]);
 
+    const table = document.getElementById("scoreTable");
     let round = 0;
     for (let r = 2; r < table.rows.length; r++) {
       round += 1;
@@ -584,56 +679,32 @@
       head,
       body,
       theme: "grid",
-      styles: {
-        font: "NotoSans",
-        fontStyle: "normal",
-        halign: "center",
-        valign: "middle",
-        fontSize: 11,
-        cellPadding: 6
-      },
-      headStyles: {
-        font: "NotoSans",
-        fontStyle: "bold",
-        fillColor: [237, 237, 237],
-        textColor: 0
-      },
+      styles: { font: "NotoSans", fontStyle: "normal", halign: "center", valign: "middle", fontSize: 11, cellPadding: 6 },
+      headStyles: { font: "NotoSans", fontStyle: "bold", fillColor: [237, 237, 237], textColor: 0 },
       alternateRowStyles: { fillColor: [251, 251, 251] },
       columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 48 } },
       didParseCell: function (data) {
-        const row = data.row;
-        const col = data.column;
-        const cell = data.cell;
+        const row = data.row, col = data.column, cell = data.cell;
 
         if (data.section === "body" && row.index === 0) {
-          cell.styles.font = "NotoSans";
           cell.styles.fontStyle = "bold";
           cell.styles.fillColor = [247, 247, 247];
-
-          if (col.index >= 2) {
-            const n = parseInt(cell.raw, 10) || 0;
-            cell.styles.textColor = signColor(n);
-          } else {
-            cell.styles.textColor = 0;
-          }
+          if (col.index >= 2) cell.styles.textColor = signColor(parseInt(cell.raw, 10) || 0);
         }
 
         if (data.section === "body" && row.index >= 1 && col.index >= 2) {
-          const n = parseInt(cell.raw, 10) || 0;
-          cell.styles.textColor = signColor(n);
+          cell.styles.textColor = signColor(parseInt(cell.raw, 10) || 0);
         }
 
         if (data.section === "body" && col.index === 1) {
           const v = String(cell.raw || "").trim();
-          cell.styles.font = "NotoSans";
           cell.styles.fontStyle = "bold";
-          if (v === "O") cell.styles.textColor = [0, 128, 0];
-          else if (v === "X") cell.styles.textColor = [204, 0, 0];
-          else cell.styles.textColor = 0;
+          if (v === "O") cell.styles.textColor = [0,128,0];
+          else if (v === "X") cell.styles.textColor = [204,0,0];
         }
 
         if (data.section === "body" && col.index === 0) {
-          cell.styles.textColor = [128, 128, 128];
+          cell.styles.textColor = [128,128,128];
         }
       }
     });
@@ -648,21 +719,12 @@
 
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
-    const rightMargin = 40;
-    const topMargin = 50;
-
-    const lastY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY : 80;
-    const lineHeight = 14;
-    let y = lastY + (2 * lineHeight);
-
-    if (y > pageH - 40) {
-      doc.addPage();
-      y = topMargin;
-    }
+    let y = (doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY : 80) + 28;
+    if (y > pageH - 40) { doc.addPage(); y = 50; }
 
     doc.setFont("NotoSans", "normal");
     doc.setFontSize(10);
-    doc.text(stamp, pageW - rightMargin, y, { align: "right" });
+    doc.text(stamp, pageW - 40, y, { align: "right" });
 
     const filename =
       "scores_" +
@@ -673,10 +735,22 @@
     doc.save(filename);
   }
 
+  async function exportPDF() {
+    if (!requirePasswordForExport()) return;
+    await doExportPDF();
+  }
+
   window.addEventListener("load", function() {
     loadGame();
-    attachAutoSaveToExistingInputs();
+    for (var i = 0; i < 4; i++) {
+      var inputs = document.getElementsByClassName("score-input-" + i);
+      Array.from(inputs).forEach(function(inp) { bindScoreInput(inp); });
+    }
+    initPasswordIfNewGame();
+    syncTopSpacer();
   });
+
+  window.addEventListener("resize", function() { syncTopSpacer(); });
 
   window.addEventListener("beforeunload", function() {
     if (!__isResetting) saveGame();
