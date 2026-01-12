@@ -20,7 +20,8 @@
     --shadow-sm: 0 6px 16px rgba(0,0,0,0.10);
     --radius: 16px;
 
-    --check-col: 44px;
+    /* ✅ cột đầu tiên: giờ fix nhỏ theo O/X */
+    --check-col: 36px;
     --topbar-pad: 10px;
 
     --chip-bg: #f3f4f6;
@@ -91,6 +92,7 @@
     overscroll-behavior-x: contain;
   }
 
+  /* ✅ Grid: cột 1 nhỏ + 4 cột còn lại chia đều */
   .namegrid{
     display: grid;
     grid-template-columns: var(--check-col) repeat(4, 1fr);
@@ -147,7 +149,7 @@
     line-height: 1.15;
   }
 
-  /* ===== Total bar ===== */
+  /* ===== Total bar (UI only change) ===== */
   .totalbar{
     margin-top: 8px;
     padding-top: 8px;
@@ -163,7 +165,14 @@
     min-width: 0;
   }
 
-  .total-label, .totalchip{
+  /* ✅ Ô trống bên trái (không còn chữ TOTAL) */
+  .total-spacer{
+    background: transparent;
+    border: 1px solid transparent;
+    min-height: 40px;
+  }
+
+  .totalchip{
     border-radius: 16px;
     min-height: 40px;
     display: flex;
@@ -173,20 +182,7 @@
     padding: 8px 10px;
     line-height: 1.1;
     font-family: inherit;
-  }
 
-  .total-label{
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--muted);
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: visible;
-  }
-
-  .totalchip{
     background: #fff;
     border: 1px solid var(--line);
     box-shadow: none;
@@ -249,6 +245,7 @@
     color: var(--muted);
   }
 
+  /* ✅ Bảng điểm: cột check nhỏ theo O/X */
   #scoreTable th:first-child,
   #scoreTable td:first-child{
     width: var(--check-col);
@@ -408,7 +405,7 @@
       --btn-padding-y: 10px;
       --btn-padding-x: 14px;
       --btn-radius: 14px;
-      --check-col: 36px;
+      --check-col: 32px;
     }
     button{ box-shadow: none; }
     .table-card{ box-shadow: none; }
@@ -445,9 +442,10 @@
           </div>
         </div>
 
+        <!-- ✅ UI change: bỏ chữ TOTAL, giữ điểm, cột trái trống -->
         <div class="totalbar" id="totalBar" style="display:none;">
           <div class="totalgrid">
-            <div class="total-label">TOTAL</div>
+            <div class="total-spacer"></div>
             <div class="totalchip"><span id="total-score-0" class="score-neutral total-score">0</span></div>
             <div class="totalchip"><span id="total-score-1" class="score-neutral total-score">0</span></div>
             <div class="totalchip"><span id="total-score-2" class="score-neutral total-score">0</span></div>
@@ -528,52 +526,10 @@
     inp.checked = on;
   }
 
-  function fitFirstColumnToTOTAL() {
+  /* ✅ UI rule: cột đầu tiên chỉ theo O/X (không còn TOTAL), nên dùng hằng số nhỏ */
+  function fitFirstColumnToOX() {
     var isMobile = window.matchMedia("(max-width: 600px)").matches;
-    var base = isMobile ? 36 : 44;
-
-    if (!getShowTotal()) {
-      document.documentElement.style.setProperty("--check-col", base + "px");
-      return;
-    }
-
-    var probe = document.getElementById("totalWidthProbe");
-    if (!probe) {
-      probe = document.createElement("span");
-      probe.id = "totalWidthProbe";
-      probe.textContent = "TOTAL";
-      probe.style.position = "absolute";
-      probe.style.visibility = "hidden";
-      probe.style.whiteSpace = "nowrap";
-      probe.style.left = "-9999px";
-      probe.style.top = "-9999px";
-      document.body.appendChild(probe);
-    }
-
-    var label = document.querySelector(".total-label");
-    if (label) {
-      var cs = getComputedStyle(label);
-      probe.style.fontFamily = cs.fontFamily;
-      probe.style.fontSize = cs.fontSize;
-      probe.style.letterSpacing = cs.letterSpacing;
-      probe.style.fontWeight = cs.fontWeight;
-    } else {
-      probe.style.fontFamily = getComputedStyle(document.body).fontFamily;
-      probe.style.fontSize = "12px";
-      probe.style.letterSpacing = "0.14em";
-      probe.style.fontWeight = "700";
-    }
-
-    var textW = Math.ceil(probe.getBoundingClientRect().width);
-
-    var pad = 20;
-    if (label) {
-      var cs2 = getComputedStyle(label);
-      pad = (parseFloat(cs2.paddingLeft) || 0) + (parseFloat(cs2.paddingRight) || 0);
-    }
-
-    var target = Math.max(base, textW + pad + 2);
-    document.documentElement.style.setProperty("--check-col", target + "px");
+    document.documentElement.style.setProperty("--check-col", (isMobile ? 32 : 36) + "px");
   }
 
   function syncTopSpacer() {
@@ -588,29 +544,26 @@
 
     bar.style.display = getShowTotal() ? "block" : "none";
     updateTotalSwitchUI();
-    fitFirstColumnToTOTAL();
+    fitFirstColumnToOX();
     syncTopSpacer();
   }
 
-  // ✅ Không hỏi popup ẩn/hiện nữa, vì đã có nút. Mặc định ẨN nếu chưa có setting.
   function ensureDefaultTotalSetting() {
     if (localStorage.getItem(TOTAL_VIS_KEY) == null) {
       localStorage.setItem(TOTAL_VIS_KEY, "0");
     }
   }
 
-  // ✅ Cho phép để trống mật khẩu (kể cả Cancel -> coi như trống)
   function initPasswordIfNewGame() {
     if (!isNewGame()) return;
     if (localStorage.getItem(PASSWORD_KEY) != null) return;
 
     var pwd = prompt("Khởi tạo mật khẩu cho ván chơi (có thể để trống).", "");
-    if (pwd === null) pwd = ""; // Cancel => trống
+    if (pwd === null) pwd = "";
     pwd = String(pwd).trim();
-    localStorage.setItem(PASSWORD_KEY, pwd); // có thể là ""
+    localStorage.setItem(PASSWORD_KEY, pwd);
   }
 
-  // ✅ Nếu mật khẩu trống / không có => export không hỏi
   function requirePasswordForExport() {
     var gamePwd = localStorage.getItem(PASSWORD_KEY);
     gamePwd = (gamePwd == null) ? "" : String(gamePwd);
@@ -758,7 +711,6 @@
     localStorage.removeItem(PASSWORD_KEY);
     localStorage.removeItem(TOTAL_VIS_KEY);
 
-    // ✅ Reset xong hỏi mật khẩu (có thể trống). Không hỏi ẩn/hiện total nữa.
     initPasswordIfNewGame();
     ensureDefaultTotalSetting();
 
@@ -821,7 +773,7 @@
     if (error) alert("Nhập sai rồi bạn êyyyy ^_^");
   }
 
-  /* ===== PDF: khôi phục rule màu như trước ===== */
+  /* ===== PDF export: giữ nguyên thuật toán & rule màu như trước ===== */
   let __pdfFontCache = null;
 
   function __arrayBufferToBase64(buffer) {
@@ -885,7 +837,6 @@
     const totals = [0,1,2,3].map(i => document.getElementById("total-score-" + i).innerText);
 
     const body = [];
-    // dòng TOTAL
     body.push(["", "TOTAL", totals[0], totals[1], totals[2], totals[3]]);
 
     const table = document.getElementById("scoreTable");
@@ -926,32 +877,22 @@
       },
       alternateRowStyles: { fillColor: [251, 251, 251] },
       columnStyles: {
-        0: { cellWidth: 26 },      // #
-        1: { cellWidth: 56 }       // TOTAL / OX
+        0: { cellWidth: 26 },
+        1: { cellWidth: 56 }
       },
       didParseCell: function (data) {
         const row = data.row, col = data.column, cell = data.cell;
 
-        // TOTAL row (row.index === 0)
         if (data.section === "body" && row.index === 0) {
           cell.styles.fontStyle = "bold";
           cell.styles.fillColor = [247, 247, 247];
-
-          if (col.index === 1) {
-            cell.styles.halign = "center";
-            cell.styles.overflow = "visible"; // tránh wrap
-          }
-          if (col.index >= 2) {
-            cell.styles.textColor = signColor(parseInt(cell.raw, 10) || 0);
-          }
+          if (col.index >= 2) cell.styles.textColor = signColor(parseInt(cell.raw, 10) || 0);
         }
 
-        // score cells (round rows)
         if (data.section === "body" && row.index >= 1 && col.index >= 2) {
           cell.styles.textColor = signColor(parseInt(cell.raw, 10) || 0);
         }
 
-        // O / X in column 1
         if (data.section === "body" && col.index === 1) {
           const v = String(cell.raw || "").trim();
           cell.styles.fontStyle = "bold";
@@ -959,14 +900,12 @@
           else if (v === "X") cell.styles.textColor = [204, 0, 0];
         }
 
-        // round number column
         if (data.section === "body" && col.index === 0) {
           cell.styles.textColor = [128, 128, 128];
         }
       }
     });
 
-    // ✅ timestamp 2 dòng, cách bảng 2 dòng, canh phải
     const now = new Date();
     const pad2 = (n) => String(n).padStart(2, "0");
     const line1 =
@@ -1015,13 +954,13 @@
       Array.from(inputs).forEach(function(inp) { bindScoreInput(inp); });
     }
 
-    initPasswordIfNewGame();   // ✅ có thể trống
+    initPasswordIfNewGame();
     bindTotalSwitch();
     applyTotalVisibility();
   });
 
   window.addEventListener("resize", function() {
-    fitFirstColumnToTOTAL();
+    fitFirstColumnToOX();
     syncTopSpacer();
   });
 
