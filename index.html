@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title> Đánh bài cùng Bích Ngân ^_^ </title>
+<style>
+  :root{
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --line: rgba(0,0,0,0.12);
+    --line-strong: rgba(0,0,0,0.22);
+    --text: #111827;
+    --muted: #6b7280;
+
+    --ok-bg: rgba(16,185,129,0.08);
+    --err-bg: rgba(239,68,68,0.08);
+
+    --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    --shadow-sm: 0 6px 16px rgba(0,0,0,0.10);
+    --radius: 16px;
+
+    /* ✅ cột đầu tiên: giờ fix nhỏ theo O/X */
+    --check-col: 36px;
+    --topbar-pad: 10px;
+
+    --chip-bg: #f3f4f6;
+    --chip-border: rgba(0,0,0,0.16);
+    --chip-fixed: #6d28d9;
+
+    --switch-off: #e5e7eb;
+    --switch-on: rgba(16,185,129,0.35);
+    --switch-knob: #ffffff;
+
+    --btn-font-size: 26px;
+    --btn-padding-y: 12px;
+    --btn-padding-x: 18px;
+    --btn-radius: 16px;
+  }
+
+  * , *::before, *::after { box-sizing: border-box; }
+  html, body{
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: clip;
+  }
+  @supports not (overflow: clip){
+    html, body{ overflow-x: hidden; }
+  }
+
+  body{
+    text-align: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  }
+
+  /* ===== Fixed Topbar ===== */
+  .topbar{
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+    background: var(--bg);
+    padding: var(--topbar-pad) 10px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner{ max-width: 980px; margin: 0 auto; }
+
+  #header{
+    font-size: 12px;
+    margin: 0 auto 8px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  .namebar-card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 8px;
+    overflow: visible;
+  }
+
+  .namebar-scroll{
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* ✅ Grid: cột 1 nhỏ + 4 cột còn lại chia đều */
+  .namegrid{
+    display: grid;
+    grid-template-columns: var(--check-col) repeat(4, 1fr);
+    gap: 8px;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+  }
+  .namegrid .spacer{ width: 100%; }
+
+  .namechip{
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-border);
+    border-radius: 16px;
+    padding: 8px 10px;
+    width: 100%;
+    height: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    white-space: normal;
+    overflow: visible;
+    word-break: break-word;
+    line-height: 1.15;
+
+    font-size: clamp(14px, 3.2vw, 20px);
+    font-family: inherit;
+  }
+
+  .namechip input[type="text"]{
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    text-align: center;
+    font-size: inherit;
+    padding: 0;
+    font-family: inherit;
+  }
+
+  .name-fixed{
+    font-weight: 800;
+    color: var(--chip-fixed);
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-family: inherit;
+
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.15;
+  }
+
+  /* ===== Total bar (UI only change) ===== */
+  .totalbar{
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .totalgrid{
+    display: grid;
+    grid-template-columns: var(--check-col) repeat(4, 1fr);
+    gap: 8px;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* ✅ Ô trống bên trái (không còn chữ TOTAL) */
+  .total-spacer{
+    background: transparent;
+    border: 1px solid transparent;
+    min-height: 40px;
+  }
+
+  .totalchip{
+    border-radius: 16px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 10px;
+    line-height: 1.1;
+    font-family: inherit;
+
+    background: #fff;
+    border: 1px solid var(--line);
+    box-shadow: none;
+  }
+
+  .total-score{
+    font-weight: 900;
+    font-size: 18px;
+    display: block;
+    width: 100%;
+  }
+
+  /* ===== Layout ===== */
+  .wrap{
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 10px 26px;
+  }
+
+  .spacer-top{ height: 140px; }
+
+  .table-card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 10px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .table-scroll{
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 0;
+    background: var(--card);
+  }
+
+  th, td{
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+
+  thead th{
+    background: #f3f4f6;
+    border-bottom: 1px solid var(--line-strong);
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* ✅ Bảng điểm: cột check nhỏ theo O/X */
+  #scoreTable th:first-child,
+  #scoreTable td:first-child{
+    width: var(--check-col);
+    min-width: var(--check-col);
+    max-width: var(--check-col);
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  tbody tr:nth-child(even){ background: rgba(0,0,0,0.02); }
+  tbody tr.row-ok{ background: linear-gradient(0deg, var(--ok-bg), var(--ok-bg)); }
+  tbody tr.row-error{ background: linear-gradient(0deg, var(--err-bg), var(--err-bg)); }
+
+  input[type="number"]{
+    width: 100%;
+    max-width: none;
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    outline: none;
+    background: #fff;
+    text-align: center;
+    font-size: 18px;
+    transition: box-shadow .15s ease, border-color .15s ease;
+    font-family: inherit;
+  }
+  input[type="number"]:focus{
+    border-color: rgba(59,130,246,0.55);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
+  }
+
+  .score-positive { color: green; }
+  .score-negative { color: red; }
+  .score-neutral  { color: grey; }
+
+  .check-positive, .check-negative{
+    display: inline-block;
+    width: 1.2em;
+    text-align: center;
+    font-weight: 800;
+    line-height: 1;
+    font-size: 22px;
+  }
+  .check-positive { color: green; }
+  .check-negative { color: red; }
+
+  .controls{
+    margin: 14px auto 0;
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+  }
+  .controls-row{
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  button{
+    margin-top: 0;
+    font-size: var(--btn-font-size);
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    border-radius: var(--btn-radius);
+    border: 1px solid var(--line);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
+    user-select: none;
+    font-family: inherit;
+    font-weight: 400;
+  }
+  button:active{ transform: translateY(1px); }
+  button:hover{ filter: brightness(0.99); }
+
+  .btn-primary{ background: #111827; color: #fff; border-color: rgba(17,24,39,0.35); }
+  .btn-secondary{ background: #fff; color: #111827; }
+  .btn-danger{ background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.35); color: #991b1b; }
+  .btn-success{ background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); color: #065f46; }
+
+  /* ===== Switch Total ===== */
+  .switch-wrap{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+
+    font-family: inherit;
+    font-size: var(--btn-font-size);
+    font-weight: 400;
+    letter-spacing: normal;
+    line-height: 1;
+
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    border-radius: var(--btn-radius);
+    border: 1px solid var(--line);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+
+    cursor: pointer;
+    user-select: none;
+    transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .switch-wrap:active{ transform: translateY(1px); }
+  .switch-wrap:hover{ filter: brightness(0.99); }
+
+  .switch-text{
+    font: inherit;
+    color: inherit;
+    font-weight: inherit;
+  }
+
+  .switch{
+    position: relative;
+    width: 56px;
+    height: 30px;
+    border-radius: 999px;
+    background: var(--switch-off);
+    border: 1px solid rgba(0,0,0,0.10);
+    transition: background .18s ease, border-color .18s ease;
+    flex: 0 0 auto;
+  }
+  .switch::after{
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--switch-knob);
+    transform: translateY(-50%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: left .18s ease;
+  }
+  .switch.on{
+    background: var(--switch-on);
+    border-color: rgba(16,185,129,0.35);
+  }
+  .switch.on::after{ left: 30px; }
+
+  .switch-input{
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .switch-wrap:focus-within{
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
+  }
+
+  @media (max-width: 600px){
+    :root{
+      --btn-font-size: 22px;
+      --btn-padding-y: 10px;
+      --btn-padding-x: 14px;
+      --btn-radius: 14px;
+      --check-col: 32px;
+    }
+    button{ box-shadow: none; }
+    .table-card{ box-shadow: none; }
+    .namebar-card{ box-shadow: none; }
+    .switch-wrap{ box-shadow: none; gap: 12px; }
+    .switch{ width: 52px; height: 28px; }
+    .switch::after{ width: 20px; height: 20px; }
+    .switch.on::after{ left: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <div id="header">------ Nam Vo ------</div>
+
+    <div class="namebar-card">
+      <div class="namebar-scroll">
+        <div class="namegrid">
+          <div class="spacer"></div>
+
+          <div class="namechip" id="namecell-0">
+            <input type="text" id="name-0" value="Bích Ngân" onblur="setName(0)">
+          </div>
+          <div class="namechip" id="namecell-1">
+            <input type="text" id="name-1" value="Phương Nam" onblur="setName(1)">
+          </div>
+          <div class="namechip" id="namecell-2">
+            <input type="text" id="name-2" value="Cẩm Lệ" onblur="setName(2)">
+          </div>
+          <div class="namechip" id="namecell-3">
+            <input type="text" id="name-3" value="Nhật Nam" onblur="setName(3)">
+          </div>
+        </div>
+
+        <!-- ✅ UI change: bỏ chữ TOTAL, giữ điểm, cột trái trống -->
+        <div class="totalbar" id="totalBar" style="display:none;">
+          <div class="totalgrid">
+            <div class="total-spacer"></div>
+            <div class="totalchip"><span id="total-score-0" class="score-neutral total-score">0</span></div>
+            <div class="totalchip"><span id="total-score-1" class="score-neutral total-score">0</span></div>
+            <div class="totalchip"><span id="total-score-2" class="score-neutral total-score">0</span></div>
+            <div class="totalchip"><span id="total-score-3" class="score-neutral total-score">0</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="spacer-top" id="spacerTop"></div>
+
+  <div class="table-card">
+    <div class="table-scroll">
+      <table id="scoreTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th></th><th></th><th></th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="controls-row">
+      <button class="btn-secondary" onclick="enterPoints()">Enter Points</button>
+      <!-- ✅ chỉ đổi handler để đếm số lần user click Complete (logic completeScores giữ nguyên) -->
+      <button class="btn-primary" onclick="completeScoresUser()">Complete</button>
+    </div>
+    <div class="controls-row">
+      <label class="switch-wrap" title="Total">
+        <span class="switch-text">Total</span>
+        <span class="switch" id="totalSwitch"></span>
+        <input class="switch-input" id="totalSwitchInput" type="checkbox" aria-label="Total">
+      </label>
+
+      <button class="btn-danger" onclick="resetGame()">Reset</button>
+      <button class="btn-success" onclick="exportPDF()">Export PDF</button>
+    </div>
+  </div>
+</div>
+
+<script src="./libs/jspdf.umd.min.js"></script>
+<script src="./libs/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+  var STORAGE_KEY = "scoreTable_save_v1";
+  var __isResetting = false;
+
+  var MASTER_PASSWORD = "vophuongnam";
+  var PASSWORD_KEY = STORAGE_KEY + "_pwd";
+  var TOTAL_VIS_KEY = STORAGE_KEY + "_showTotal";
+
+  // ===== Upload config =====
+  var DRIVE_UPLOAD_URL = "https://script.google.com/macros/s/AKfycbwS6ITmWCNk63XYemAOFn_wT1-NcUqz4jWnPeYiPARs9_TceZHJ3mK6YU2JRW_YsOioAQ/exec";
+  var DRIVE_UPLOAD_SECRET = "namvo_2026_pdf_secret";
+
+  // ===== After every 5 user Complete clicks =====
+  var COMPLETE_COUNT_KEY = STORAGE_KEY + "_completeClickCount";
+
+  // ===== Exit-upload reliability keys =====
+  var LAST_UPLOAD_HASH_KEY = STORAGE_KEY + "_lastUploadHash";
+  var LAST_EXIT_ATTEMPT_KEY = STORAGE_KEY + "_lastExitAttemptHash";
+  var PENDING_UPLOAD_KEY = STORAGE_KEY + "_pendingUploadPayload";
+  var PENDING_UPLOAD_HASH_KEY = STORAGE_KEY + "_pendingUploadHash";
+
+  // ===== TRIỆT ĐỂ: uploader "multi-shot" cho mobile (gửi được nhiều lần) =====
+  var __uploadQueue = [];
+  var __uploadBusy = false;
+
+  function silentSaveReportToDrive(payloadObj) {
+    try {
+      if (!DRIVE_UPLOAD_URL) return;
+      __uploadQueue.push(payloadObj);
+      __drainUploadQueue();
+    } catch (e) {}
+  }
+
+  function __drainUploadQueue(){
+    if (__uploadBusy) return;
+    var job = __uploadQueue.shift();
+    if (!job) return;
+
+    __uploadBusy = true;
+    __silentSendOnce(job, function(){
+      __uploadBusy = false;
+      setTimeout(__drainUploadQueue, 120);
+    });
+  }
+
+  function __silentSendOnce(payloadObj, done){
+    var json = "";
+    try { json = JSON.stringify(payloadObj); } catch(e){ done && done(); return; }
+
+    // 1) sendBeacon: chỉ dùng nếu payload nhỏ (an toàn < ~60KB)
+    try{
+      if (navigator && typeof navigator.sendBeacon === "function") {
+        var blob = new Blob([json], { type: "text/plain;charset=UTF-8" });
+        if (blob.size < 60000) {
+          navigator.sendBeacon(DRIVE_UPLOAD_URL, blob);
+          done && done();
+          return;
+        }
+      }
+    }catch(e){}
+
+    // 2) fetch keepalive (im lặng, không đọc response)
+    try{
+      fetch(DRIVE_UPLOAD_URL, {
+        method: "POST",
+        mode: "no-cors",
+        keepalive: true,
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        body: json
+      }).catch(function(){});
+      done && done();
+      return;
+    }catch(e){}
+
+    // 3) fallback cuối: iframe+form NEW mỗi lần
+    try{
+      var iframeName = "drive_ifr_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+
+      var ifr = document.createElement("iframe");
+      ifr.name = iframeName;
+      ifr.style.width = "0";
+      ifr.style.height = "0";
+      ifr.style.border = "0";
+      ifr.style.position = "absolute";
+      ifr.style.left = "-9999px";
+      ifr.style.top = "-9999px";
+      ifr.setAttribute("aria-hidden", "true");
+      document.body.appendChild(ifr);
+
+      var form = document.createElement("form");
+      form.method = "POST";
+      form.action = DRIVE_UPLOAD_URL;
+      form.target = iframeName;
+      form.enctype = "application/x-www-form-urlencoded";
+      form.style.display = "none";
+
+      var inp = document.createElement("input");
+      inp.type = "hidden";
+      inp.name = "payload";
+      inp.value = json;
+      form.appendChild(inp);
+
+      document.body.appendChild(form);
+      form.submit();
+
+      setTimeout(function(){
+        try { document.body.removeChild(form); } catch(e){}
+        try { document.body.removeChild(ifr); } catch(e){}
+      }, 4000);
+
+    }catch(e){}
+
+    done && done();
+  }
+
+  // ===== Hash helper (for dedupe / best-effort) =====
+  function __hashStringDJB2(str){
+    var s = String(str || "");
+    var h = 5381;
+    for (var i = 0; i < s.length; i++) {
+      h = ((h << 5) + h) + s.charCodeAt(i);
+      h = h >>> 0;
+    }
+    return String(h);
+  }
+
+  // ===== Filename helpers =====
+  function __nameToFilePart(name, fallback) {
+    var s = String(name || "").trim();
+    if (s === "") s = fallback;
+    s = s.replace(/\s+/g, "_");
+    return s;
+  }
+
+  function __buildScoreFileName(n1, n2, n3, n4, nowDate) {
+    var now = nowDate || new Date();
+    var pad2 = (n) => String(n).padStart(2, "0");
+
+    var p1 = __nameToFilePart(n1, "P1");
+    var p2 = __nameToFilePart(n2, "P2");
+    var p3 = __nameToFilePart(n3, "P3");
+    var p4 = __nameToFilePart(n4, "P4");
+
+    return (
+      "SCORE_" + p1 + "_" + p2 + "_" + p3 + "_" + p4 + "_" +
+      pad2(now.getDate()) + "_" + pad2(now.getMonth() + 1) + "_" + now.getFullYear() + "_" +
+      pad2(now.getHours()) + "_" + pad2(now.getMinutes()) + "_" + pad2(now.getSeconds()) +
+      ".pdf"
+    );
+  }
+
+  function getCompleteClickCount(){
+    var v = parseInt(localStorage.getItem(COMPLETE_COUNT_KEY) || "0", 10);
+    return isNaN(v) ? 0 : v;
+  }
+  function setCompleteClickCount(v){
+    localStorage.setItem(COMPLETE_COUNT_KEY, String(v || 0));
+  }
+
+  function isNewGame() { return !localStorage.getItem(STORAGE_KEY); }
+
+  function getShowTotal() {
+    return localStorage.getItem(TOTAL_VIS_KEY) === "1";
+  }
+
+  function setShowTotal(on){
+    localStorage.setItem(TOTAL_VIS_KEY, on ? "1" : "0");
+    applyTotalVisibility();
+  }
+
+  function updateTotalSwitchUI(){
+    var sw = document.getElementById("totalSwitch");
+    var inp = document.getElementById("totalSwitchInput");
+    if (!sw || !inp) return;
+
+    var on = getShowTotal();
+    sw.classList.toggle("on", on);
+    inp.checked = on;
+  }
+
+  function fitFirstColumnToOX() {
+    var isMobile = window.matchMedia("(max-width: 600px)").matches;
+    document.documentElement.style.setProperty("--check-col", (isMobile ? 32 : 36) + "px");
+  }
+
+  function syncTopSpacer() {
+    var topbar = document.getElementById("topbar");
+    var spacer = document.getElementById("spacerTop");
+    spacer.style.height = (topbar.offsetHeight + 12) + "px";
+  }
+
+  function applyTotalVisibility() {
+    var bar = document.getElementById("totalBar");
+    if (!bar) return;
+
+    bar.style.display = getShowTotal() ? "block" : "none";
+    updateTotalSwitchUI();
+    fitFirstColumnToOX();
+    syncTopSpacer();
+  }
+
+  function ensureDefaultTotalSetting() {
+    if (localStorage.getItem(TOTAL_VIS_KEY) == null) {
+      localStorage.setItem(TOTAL_VIS_KEY, "0");
+    }
+  }
+
+  function initPasswordIfNewGame() {
+    if (!isNewGame()) return;
+    if (localStorage.getItem(PASSWORD_KEY) != null) return;
+
+    var pwd = prompt("Khởi tạo mật khẩu cho ván chơi (có thể để trống).", "");
+    if (pwd === null) pwd = "";
+    pwd = String(pwd).trim();
+    localStorage.setItem(PASSWORD_KEY, pwd);
+  }
+
+  function requirePasswordForExport() {
+    var gamePwd = localStorage.getItem(PASSWORD_KEY);
+    gamePwd = (gamePwd == null) ? "" : String(gamePwd);
+
+    if (gamePwd.trim() === "") return true;
+
+    var entered = prompt("Nhập mật khẩu để xuất PDF.");
+    if (entered === null) return false;
+
+    entered = String(entered).trim();
+    if (entered === gamePwd || entered === MASTER_PASSWORD) return true;
+
+    alert("Mật khẩu sai.");
+    return false;
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function applySignColorToInput(input) {
+    input.classList.remove("score-positive", "score-negative", "score-neutral");
+    var raw = (input.value || "").trim();
+    var n = parseInt(raw, 10);
+
+    if (raw === "" || isNaN(n) || n === 0) input.classList.add("score-neutral");
+    else if (n > 0) input.classList.add("score-positive");
+    else input.classList.add("score-negative");
+  }
+
+  function bindScoreInput(input) {
+    if (input.dataset && input.dataset.bound === "1") {
+      applySignColorToInput(input);
+      return;
+    }
+    if (input.dataset) input.dataset.bound = "1";
+
+    applySignColorToInput(input);
+
+    input.addEventListener("input", function() {
+      applySignColorToInput(input);
+      saveGame();
+    });
+  }
+
+  function applyColorsToAllScoreInputs() {
+    for (var i = 0; i < 4; i++) {
+      var inputs = document.getElementsByClassName("score-input-" + i);
+      Array.from(inputs).forEach(function(inp) { applySignColorToInput(inp); });
+    }
+  }
+
+  function saveGame() {
+    if (__isResetting) return;
+
+    var table = document.getElementById("scoreTable");
+    var data = { headers: [], rows: [] };
+
+    for (var i = 0; i < 4; i++) {
+      var cell = document.getElementById("namecell-" + i);
+      var input = cell ? cell.querySelector("input") : null;
+      if (input) data.headers.push({ isInput: true, value: input.value });
+      else data.headers.push({ isInput: false, value: cell ? cell.innerHTML : "" });
+    }
+
+    for (var r = 1; r < table.rows.length; r++) {
+      var row = table.rows[r];
+      var rowObj = { check: row.cells[0].innerHTML, scores: [] };
+      for (var c = 1; c <= 4; c++) {
+        var cellInput = row.cells[c].firstChild;
+        rowObj.scores.push(cellInput ? (cellInput.value || "") : "");
+      }
+      data.rows.push(rowObj);
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function loadGame() {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+
+    var trimmed = String(raw).trim();
+    if (trimmed[0] !== "{") return;
+
+    try {
+      var data = JSON.parse(trimmed);
+      if (!(data && data.headers && data.rows)) return;
+
+      for (var i = 0; i < 4; i++) {
+        var wrap = document.getElementById("namecell-" + i);
+        var h = data.headers[i];
+
+        if (wrap && h && h.isInput) {
+          wrap.innerHTML = '<input type="text" id="name-' + i + '" value="' + escapeHtml(h.value || "") + '" onblur="setName(' + i + ')">';
+        } else if (wrap) {
+          wrap.innerHTML = (h && h.value != null) ? h.value : wrap.innerHTML;
+        }
+      }
+
+      var table = document.getElementById("scoreTable");
+      while (table.rows.length > 1) table.deleteRow(-1);
+
+      if (data.rows && data.rows.length) {
+        data.rows.forEach(function(r) {
+          var row = table.insertRow(-1);
+          var checkCell = row.insertCell(0);
+          checkCell.innerHTML = r.check || '';
+
+          for (var i = 1; i <= 4; i++) {
+            var cell = row.insertCell(i);
+            cell.innerHTML = '<input type="number" class="score-input-' + (i - 1) + '">';
+            var inp = cell.firstChild;
+            inp.value = (r.scores && r.scores[i - 1] != null) ? r.scores[i - 1] : "";
+            bindScoreInput(inp);
+          }
+        });
+      }
+
+      completeScores();
+    } catch (e) {}
+  }
+
+  function setName(index) {
+    var input = document.getElementById("name-" + index);
+    var name = input.value;
+    var wrap = document.getElementById("namecell-" + index);
+
+    wrap.innerHTML = '<span class="name-fixed">' + escapeHtml(name) + '</span>';
+
+    saveGame();
+    applyTotalVisibility();
+  }
+
+  function resetGame() {
+    if (!confirm("Bạn có chắc muốn reset để tạo game mới và xoá hết dữ liệu cũ không?")) return;
+    __isResetting = true;
+
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(PASSWORD_KEY);
+    localStorage.removeItem(TOTAL_VIS_KEY);
+
+    localStorage.removeItem(COMPLETE_COUNT_KEY);
+
+    localStorage.removeItem(LAST_UPLOAD_HASH_KEY);
+    localStorage.removeItem(LAST_EXIT_ATTEMPT_KEY);
+    localStorage.removeItem(PENDING_UPLOAD_KEY);
+    localStorage.removeItem(PENDING_UPLOAD_HASH_KEY);
+
+    initPasswordIfNewGame();
+    ensureDefaultTotalSetting();
+
+    setTimeout(function(){ location.reload(); }, 0);
+  }
+
+  function enterPoints() {
+    var table = document.getElementById("scoreTable");
+    var row = table.insertRow(-1);
+    var checkCell = row.insertCell(0);
+    checkCell.innerHTML = '';
+    for (var i = 1; i <= 4; i++) {
+      var cell = row.insertCell(i);
+      cell.innerHTML = '<input type="number" class="score-input-' + (i - 1) + '">';
+      bindScoreInput(cell.firstChild);
+    }
+    saveGame();
+  }
+
+  function completeScores() {
+    var totals = [0, 0, 0, 0];
+    var table = document.getElementById("scoreTable");
+    var rowCount = table.rows.length;
+    var error = false;
+
+    applyColorsToAllScoreInputs();
+
+    for (var i = 0; i < 4; i++) {
+      var inputs = document.getElementsByClassName("score-input-" + i);
+      totals[i] = Array.from(inputs).reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+      var totalElement = document.getElementById("total-score-" + i);
+      totalElement.innerText = totals[i];
+      if (totals[i] > 0) totalElement.className = 'score-positive total-score';
+      else if (totals[i] < 0) totalElement.className = 'score-negative total-score';
+      else totalElement.className = 'score-neutral total-score';
+    }
+
+    for (var rowIdx = 1; rowIdx < rowCount; rowIdx++) {
+      var row = table.rows[rowIdx];
+      var rowSum = 0;
+      for (var colIdx = 1; colIdx <= 4; colIdx++) {
+        var cell = row.cells[colIdx].firstChild;
+        rowSum += parseInt(cell.value) || 0;
+      }
+
+      row.classList.remove("row-ok", "row-error");
+
+      var checkCell = row.cells[0];
+      if (rowSum === 0) {
+        checkCell.innerHTML = '<span class="check-positive">O</span>';
+        row.classList.add("row-ok");
+      } else {
+        checkCell.innerHTML = '<span class="check-negative">X</span>';
+        row.classList.add("row-error");
+        error = true;
+      }
+    }
+
+    saveGame();
+    if (error) alert("Nhập sai rồi bạn êyyyy ^_^");
+  }
+
+  // ===== Complete click wrapper: every 5 clicks => upload report =====
+  function completeScoresUser(){
+    completeScores();
+
+    try{
+      var cnt = getCompleteClickCount() + 1;
+      setCompleteClickCount(cnt);
+
+      if (cnt % 5 === 0) {
+        __autoUploadReportNow();
+      }
+    }catch(e){}
+  }
+
+  function __getPlayerNameNow(i) {
+    var cell = document.getElementById("namecell-" + i);
+    if (!cell) return "";
+    var inp = cell.querySelector("input");
+    var v = inp ? inp.value : (cell.textContent || "");
+    return String(v || "").trim();
+  }
+
+  function __autoUploadReportNow(){
+    try{
+      var names = [0,1,2,3].map(__getPlayerNameNow);
+      var now = new Date();
+
+      var pad2 = (n) => String(n).padStart(2, "0");
+      var line1 =
+        "Report được tạo vào ngày " +
+        pad2(now.getDate()) + "/" + pad2(now.getMonth() + 1) + "/" + now.getFullYear() + " " +
+        pad2(now.getHours()) + ":" + pad2(now.getMinutes()) + ":" + pad2(now.getSeconds());
+      var line2 = "bởi Nam Võ";
+
+      var filename = __buildScoreFileName(names[0], names[1], names[2], names[3], now);
+
+      var totals = [0,1,2,3].map(function(i){
+        return parseInt(document.getElementById("total-score-" + i).innerText, 10) || 0;
+      });
+
+      var tableEl = document.getElementById("scoreTable");
+      var rowsPayload = [];
+      var round = 0;
+      for (var rr = 1; rr < tableEl.rows.length; rr++) {
+        round += 1;
+        var row = tableEl.rows[rr];
+        var check = (row.cells[0].textContent || "").trim();
+        var scores = [];
+        for (var cc = 1; cc <= 4; cc++) {
+          scores.push(parseInt(row.cells[cc].firstChild.value, 10) || 0);
+        }
+        rowsPayload.push({ round: round, check: check, scores: scores });
+      }
+
+      var payload = {
+        secret: DRIVE_UPLOAD_SECRET,
+        fileName: filename,
+        names: names,
+        totals: totals,
+        rows: rowsPayload,
+        createdAtText: line1,
+        createdByText: line2
+      };
+
+      // best-effort mark uploaded by state hash
+      try{
+        var st = localStorage.getItem(STORAGE_KEY) || "";
+        var h = __hashStringDJB2(st);
+        if (h) localStorage.setItem(LAST_UPLOAD_HASH_KEY, h);
+      }catch(e){}
+
+      silentSaveReportToDrive(payload);
+    }catch(e){}
+  }
+
+  // ===== Exit upload: build payload WITHOUT changing UI (no alert) =====
+  function __buildUploadPayloadFromCurrentState(now) {
+    var d = now || new Date();
+    var pad2 = (n) => String(n).padStart(2, "0");
+    var line1 =
+      "Report được tạo vào ngày " +
+      pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1) + "/" + d.getFullYear() + " " +
+      pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + ":" + pad2(d.getSeconds());
+    var line2 = "bởi Nam Võ";
+
+    var names = [0,1,2,3].map(__getPlayerNameNow);
+    var filename = __buildScoreFileName(names[0], names[1], names[2], names[3], d);
+
+    // totals (tính từ input, KHÔNG sửa DOM)
+    var totals = [0,0,0,0];
+    for (var i = 0; i < 4; i++) {
+      var inputs = document.getElementsByClassName("score-input-" + i);
+      totals[i] = Array.from(inputs).reduce(function(sum, input){
+        return sum + (parseInt(input.value, 10) || 0);
+      }, 0);
+    }
+
+    // rows (tính check O/X từ rowSum, KHÔNG sửa DOM)
+    var table = document.getElementById("scoreTable");
+    var rows = [];
+    var round = 0;
+    for (var r = 1; r < table.rows.length; r++) {
+      round += 1;
+      var row = table.rows[r];
+      var scores = [];
+      var rowSum = 0;
+      for (var c = 1; c <= 4; c++) {
+        var v = parseInt(row.cells[c].firstChild.value, 10) || 0;
+        scores.push(v);
+        rowSum += v;
+      }
+      var check = (rowSum === 0) ? "O" : "X";
+      rows.push({ round: round, check: check, scores: scores });
+    }
+
+    return {
+      secret: DRIVE_UPLOAD_SECRET,
+      fileName: filename,
+      names: names,
+      totals: totals,
+      rows: rows,
+      createdAtText: line1,
+      createdByText: line2
+    };
+  }
+
+  var __exitHandled = false;
+
+  function __attemptUploadOnExit(reason){
+    try{
+      if (__exitHandled) return;
+      if (__isResetting) return;
+
+      // lưu local trước
+      saveGame();
+
+      var state = localStorage.getItem(STORAGE_KEY) || "";
+      if (!state) return;
+
+      var stateHash = __hashStringDJB2(state);
+
+      // đã upload state này rồi => bỏ
+      var lastUploadedHash = localStorage.getItem(LAST_UPLOAD_HASH_KEY) || "";
+      if (stateHash === lastUploadedHash) return;
+
+      // tránh bị gọi lặp do 3 event cùng lúc
+      var lastAttempt = localStorage.getItem(LAST_EXIT_ATTEMPT_KEY) || "";
+      if (stateHash === lastAttempt) return;
+
+      __exitHandled = true;
+      localStorage.setItem(LAST_EXIT_ATTEMPT_KEY, stateHash);
+
+      var payload = __buildUploadPayloadFromCurrentState(new Date());
+
+      // lưu pending để lần sau mở web sẽ gửi bù nếu lần này OS chặn
+      try{
+        localStorage.setItem(PENDING_UPLOAD_KEY, JSON.stringify(payload));
+        localStorage.setItem(PENDING_UPLOAD_HASH_KEY, stateHash);
+      }catch(e){}
+
+      // gửi ngay (âm thầm)
+      silentSaveReportToDrive(payload);
+    }catch(e){}
+  }
+
+  function __sendPendingUploadIfAny(){
+    try{
+      var raw = localStorage.getItem(PENDING_UPLOAD_KEY);
+      if (!raw) return;
+
+      var payload = null;
+      try { payload = JSON.parse(raw); } catch(e){ payload = null; }
+      if (!payload) {
+        localStorage.removeItem(PENDING_UPLOAD_KEY);
+        localStorage.removeItem(PENDING_UPLOAD_HASH_KEY);
+        return;
+      }
+
+      silentSaveReportToDrive(payload);
+
+      // best-effort coi như đã gửi bù xong
+      var ph = localStorage.getItem(PENDING_UPLOAD_HASH_KEY) || "";
+      if (ph) localStorage.setItem(LAST_UPLOAD_HASH_KEY, ph);
+
+      localStorage.removeItem(PENDING_UPLOAD_KEY);
+      localStorage.removeItem(PENDING_UPLOAD_HASH_KEY);
+    }catch(e){}
+  }
+
+  function __bindExitHooks(){
+    // 1) beforeunload
+    window.addEventListener("beforeunload", function(){
+      __attemptUploadOnExit("beforeunload");
+    });
+
+    // 2) pagehide (đặc biệt hữu dụng trên iOS/Safari)
+    window.addEventListener("pagehide", function(){
+      __attemptUploadOnExit("pagehide");
+    });
+
+    // 3) visibilitychange (chuyển app/tab, lock screen)
+    document.addEventListener("visibilitychange", function(){
+      if (document.visibilityState === "hidden") {
+        __attemptUploadOnExit("visibilitychange");
+      }
+    });
+  }
+
+  /* ===== PDF export: giữ nguyên thuật toán & rule màu như trước ===== */
+  let __pdfFontCache = null;
+
+  function __arrayBufferToBase64(buffer) {
+    let binary = "";
+    const bytes = new Uint8Array(buffer);
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
+  }
+
+  async function __getPdfFontCache() {
+    if (__pdfFontCache) return __pdfFontCache;
+
+    const regularUrl = "./fonts/NotoSans-Regular.ttf";
+    const boldUrl = "./fonts/NotoSans-Bold.ttf";
+
+    const [regBuf, boldBuf] = await Promise.all([
+      fetch(regularUrl).then(r => { if (!r.ok) throw new Error(); return r.arrayBuffer(); }),
+      fetch(boldUrl).then(r => { if (!r.ok) throw new Error(); return r.arrayBuffer(); })
+    ]);
+
+    __pdfFontCache = {
+      regularB64: __arrayBufferToBase64(regBuf),
+      boldB64: __arrayBufferToBase64(boldBuf)
+    };
+    return __pdfFontCache;
+  }
+
+  async function __attachVietnameseFontsToDoc(doc) {
+    const cache = await __getPdfFontCache();
+    doc.addFileToVFS("NotoSans-Regular.ttf", cache.regularB64);
+    doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
+    doc.addFileToVFS("NotoSans-Bold.ttf", cache.boldB64);
+    doc.addFont("NotoSans-Bold.ttf", "NotoSans", "bold");
+  }
+
+  async function doExportPDF() {
+    completeScores();
+    if (!window.jspdf || !window.jspdf.jsPDF) return;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+    await __attachVietnameseFontsToDoc(doc);
+
+    function getPlayerName(i) {
+      var cell = document.getElementById("namecell-" + i);
+      if (!cell) return "";
+      var inp = cell.querySelector("input");
+      var v = inp ? inp.value : (cell.textContent || "");
+      return String(v || "").trim();
+    }
+    const names = [0,1,2,3].map(getPlayerName);
+
+    doc.setFont("NotoSans", "bold");
+    doc.setFontSize(16);
+    doc.text("—— Nam Vo ——", doc.internal.pageSize.getWidth() / 2, 50, { align: "center" });
+
+    const head = [["#", "", names[0], names[1], names[2], names[3]]];
+    const totals = [0,1,2,3].map(i => document.getElementById("total-score-" + i).innerText);
+
+    const body = [];
+    body.push(["", "TOTAL", totals[0], totals[1], totals[2], totals[3]]);
+
+    const table = document.getElementById("scoreTable");
+    let round = 0;
+    for (let r = 1; r < table.rows.length; r++) {
+      round += 1;
+      const row = table.rows[r];
+      const check = (row.cells[0].textContent || "").trim();
+      const vals = [];
+      for (let c = 1; c <= 4; c++) vals.push(String(parseInt(row.cells[c].firstChild.value) || 0));
+      body.push([String(round), check, vals[0], vals[1], vals[2], vals[3]]);
+    }
+
+    function signColor(n) {
+      if (n > 0) return [0, 128, 0];
+      if (n < 0) return [204, 0, 0];
+      return [128, 128, 128];
+    }
+
+    doc.autoTable({
+      startY: 80,
+      head,
+      body,
+      theme: "grid",
+      styles: {
+        font: "NotoSans",
+        fontStyle: "normal",
+        halign: "center",
+        valign: "middle",
+        fontSize: 11,
+        cellPadding: 6
+      },
+      headStyles: {
+        font: "NotoSans",
+        fontStyle: "bold",
+        fillColor: [237, 237, 237],
+        textColor: 0
+      },
+      alternateRowStyles: { fillColor: [251, 251, 251] },
+      columnStyles: {
+        0: { cellWidth: 26 },
+        1: { cellWidth: 56 }
+      },
+      didParseCell: function (data) {
+        const row = data.row, col = data.column, cell = data.cell;
+
+        if (data.section === "body" && row.index === 0) {
+          cell.styles.fontStyle = "bold";
+          cell.styles.fillColor = [247, 247, 247];
+          if (col.index >= 2) cell.styles.textColor = signColor(parseInt(cell.raw, 10) || 0);
+        }
+
+        if (data.section === "body" && row.index >= 1 && col.index >= 2) {
+          cell.styles.textColor = signColor(parseInt(cell.raw, 10) || 0);
+        }
+
+        if (data.section === "body" && col.index === 1) {
+          const v = String(cell.raw || "").trim();
+          cell.styles.fontStyle = "bold";
+          if (v === "O") cell.styles.textColor = [0, 128, 0];
+          else if (v === "X") cell.styles.textColor = [204, 0, 0];
+        }
+
+        if (data.section === "body" && col.index === 0) {
+          cell.styles.textColor = [128, 128, 128];
+        }
+      }
+    });
+
+    const now = new Date();
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const line1 =
+      "Report được tạo vào ngày " +
+      pad2(now.getDate()) + "/" + pad2(now.getMonth() + 1) + "/" + now.getFullYear() + " " +
+      pad2(now.getHours()) + ":" + pad2(now.getMinutes()) + ":" + pad2(now.getSeconds());
+    const line2 = "bởi Nam Võ";
+
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    let y = (doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY : 80) + 28;
+    if (y > pageH - 60) { doc.addPage(); y = 50; }
+
+    doc.setFont("NotoSans", "normal");
+    doc.setFontSize(10);
+    doc.text([line1, line2], pageW - 40, y, { align: "right" });
+
+    const filename = __buildScoreFileName(names[0], names[1], names[2], names[3], now);
+
+    // ===== Upload "âm thầm": gửi JSON nhỏ =====
+    var totalsPayload = [0,1,2,3].map(function(i){
+      return parseInt(document.getElementById("total-score-" + i).innerText, 10) || 0;
+    });
+
+    var tableEl = document.getElementById("scoreTable");
+    var rowsPayload = [];
+    var round2 = 0;
+    for (var rr = 1; rr < tableEl.rows.length; rr++) {
+      round2 += 1;
+      var row2 = tableEl.rows[rr];
+      var check2 = (row2.cells[0].textContent || "").trim();
+      var scores2 = [];
+      for (var cc = 1; cc <= 4; cc++) {
+        scores2.push(parseInt(row2.cells[cc].firstChild.value, 10) || 0);
+      }
+      rowsPayload.push({ round: round2, check: check2, scores: scores2 });
+    }
+
+    var payload = {
+      secret: DRIVE_UPLOAD_SECRET,
+      fileName: filename,
+      names: names,
+      totals: totalsPayload,
+      rows: rowsPayload,
+      createdAtText: line1,
+      createdByText: line2
+    };
+
+    silentSaveReportToDrive(payload);
+
+    // best-effort mark uploaded hash
+    try{
+      var stNow = localStorage.getItem(STORAGE_KEY) || "";
+      var hNow = __hashStringDJB2(stNow);
+      if (hNow) localStorage.setItem(LAST_UPLOAD_HASH_KEY, hNow);
+      localStorage.removeItem(PENDING_UPLOAD_KEY);
+      localStorage.removeItem(PENDING_UPLOAD_HASH_KEY);
+    }catch(e){}
+
+    // ✅ vẫn xuất PDF như trước
+    setTimeout(function(){
+      doc.save(filename);
+    }, 450);
+  }
+
+  async function exportPDF() {
+    if (!requirePasswordForExport()) return;
+    await doExportPDF();
+  }
+
+  function bindTotalSwitch(){
+    var inp = document.getElementById("totalSwitchInput");
+    if (!inp) return;
+    inp.addEventListener("change", function(){
+      setShowTotal(inp.checked);
+    });
+  }
+
+  window.addEventListener("load", function() {
+    ensureDefaultTotalSetting();
+
+    // gửi bù nếu lần trước OS chặn request khi rời trang
+    __sendPendingUploadIfAny();
+
+    loadGame();
+
+    for (var i = 0; i < 4; i++) {
+      var inputs = document.getElementsByClassName("score-input-" + i);
+      Array.from(inputs).forEach(function(inp) { bindScoreInput(inp); });
+    }
+
+    initPasswordIfNewGame();
+    bindTotalSwitch();
+    applyTotalVisibility();
+
+    // ✅ bind 3 exit signals
+    __bindExitHooks();
+  });
+
+  window.addEventListener("resize", function() {
+    fitFirstColumnToOX();
+    syncTopSpacer();
+  });
+
+  window.addEventListener("beforeunload", function() {
+    if (!__isResetting) saveGame();
+  });
+</script>
+
+</body>
+</html>
