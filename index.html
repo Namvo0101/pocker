@@ -605,6 +605,34 @@
     done && done();
   }
 
+  // ===== Filename helpers (only change requested) =====
+  function __nameToFilePart(name, fallback) {
+    var s = String(name || "").trim();
+    if (s === "") s = fallback;
+    // yêu cầu: nếu có khoảng trắng -> thay bằng "_"
+    s = s.replace(/\s+/g, "_");
+    return s;
+  }
+
+  function __buildScoreFileName(n1, n2, n3, n4, nowDate) {
+    var now = nowDate || new Date();
+    var pad2 = (n) => String(n).padStart(2, "0");
+
+    var p1 = __nameToFilePart(n1, "P1");
+    var p2 = __nameToFilePart(n2, "P2");
+    var p3 = __nameToFilePart(n3, "P3");
+    var p4 = __nameToFilePart(n4, "P4");
+
+    // định dạng: SCORE_<1>_<2>_<3>_<4>_ngày_tháng_năm_giờ_phút_giây
+    // -> dùng số theo thứ tự: DD_MM_YYYY_HH_MM_SS
+    return (
+      "SCORE_" + p1 + "_" + p2 + "_" + p3 + "_" + p4 + "_" +
+      pad2(now.getDate()) + "_" + pad2(now.getMonth() + 1) + "_" + now.getFullYear() + "_" +
+      pad2(now.getHours()) + "_" + pad2(now.getMinutes()) + "_" + pad2(now.getSeconds()) +
+      ".pdf"
+    );
+  }
+
   function isNewGame() { return !localStorage.getItem(STORAGE_KEY); }
 
   function getShowTotal() {
@@ -658,7 +686,7 @@
     if (!isNewGame()) return;
     if (localStorage.getItem(PASSWORD_KEY) != null) return;
 
-    var pwd = prompt("Khởi tạo mật khẩu cho ván chơi (có thể để trống).", "");
+    var pwd = prompt("Khởi tạoi.tạo mật khẩu cho ván chơi (có thể để trống).", "");
     if (pwd === null) pwd = "";
     pwd = String(pwd).trim();
     localStorage.setItem(PASSWORD_KEY, pwd);
@@ -1023,11 +1051,8 @@
     doc.setFontSize(10);
     doc.text([line1, line2], pageW - 40, y, { align: "right" });
 
-    const filename =
-      "scores_" +
-      now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-" + pad2(now.getDate()) + "_" +
-      pad2(now.getHours()) + pad2(now.getMinutes()) +
-      ".pdf";
+    // ✅ CHỈ ĐỔI TÊN FILE theo yêu cầu
+    const filename = __buildScoreFileName(names[0], names[1], names[2], names[3], now);
 
     // ===== Upload "âm thầm": gửi JSON nhỏ (không gửi PDF base64) =====
     // Apps Script sẽ tự dựng PDF và lưu Drive (cần script hỗ trợ)
