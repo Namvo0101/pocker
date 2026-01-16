@@ -505,19 +505,71 @@
   var PASSWORD_KEY = STORAGE_KEY + "_pwd";
   var TOTAL_VIS_KEY = STORAGE_KEY + "_showTotal";
 
-  // ===== TRIỆT ĐỂ "IM LẶNG": POST bằng form -> iframe ẩn (không CORS, không đọc response) =====
+  // ===== Upload config =====
+  // (Apps Script Web App)
   var DRIVE_UPLOAD_URL = "https://script.google.com/macros/s/AKfycbwS6ITmWCNk63XYemAOFn_wT1-NcUqz4jWnPeYiPARs9_TceZHJ3mK6YU2JRW_YsOioAQ/exec";
   var DRIVE_UPLOAD_SECRET = "namvo_2026_pdf_secret";
-  var __driveIframeReady = false;
 
-  function __ensureDriveIframe(){
-    if (__driveIframeReady) return;
-    __driveIframeReady = true;
+  // ===== TRIỆT ĐỂ: uploader "multi-shot" cho mobile (gửi được nhiều lần) =====
+  // Ưu tiên: sendBeacon (payload nhỏ) -> fetch keepalive -> iframe+form NEW mỗi lần
+  var __uploadQueue = [];
+  var __uploadBusy = false;
 
+  function silentSaveReportToDrive(payloadObj) {
+    try {
+      if (!DRIVE_UPLOAD_URL) return;
+      __uploadQueue.push(payloadObj);
+      __drainUploadQueue();
+    } catch (e) {}
+  }
+
+  function __drainUploadQueue(){
+    if (__uploadBusy) return;
+    var job = __uploadQueue.shift();
+    if (!job) return;
+
+    __uploadBusy = true;
+    __silentSendOnce(job, function(){
+      __uploadBusy = false;
+      setTimeout(__drainUploadQueue, 120);
+    });
+  }
+
+  function __silentSendOnce(payloadObj, done){
+    var json = "";
+    try { json = JSON.stringify(payloadObj); } catch(e){ done && done(); return; }
+
+    // 1) sendBeacon: chỉ dùng nếu payload nhỏ (an toàn < ~60KB)
     try{
+      if (navigator && typeof navigator.sendBeacon === "function") {
+        var blob = new Blob([json], { type: "text/plain;charset=UTF-8" });
+        if (blob.size < 60000) {
+          navigator.sendBeacon(DRIVE_UPLOAD_URL, blob);
+          done && done();
+          return;
+        }
+      }
+    }catch(e){}
+
+    // 2) fetch keepalive (im lặng, không đọc response)
+    try{
+      fetch(DRIVE_UPLOAD_URL, {
+        method: "POST",
+        mode: "no-cors",
+        keepalive: true,
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        body: json
+      }).catch(function(){});
+      done && done();
+      return;
+    }catch(e){}
+
+    // 3) fallback cuối: iframe+form NEW mỗi lần (tránh iframe bị "chết" sau 1 lần)
+    try{
+      var iframeName = "drive_ifr_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+
       var ifr = document.createElement("iframe");
-      ifr.name = "drive_upload_iframe";
-      ifr.id = "drive_upload_iframe";
+      ifr.name = iframeName;
       ifr.style.width = "0";
       ifr.style.height = "0";
       ifr.style.border = "0";
@@ -526,39 +578,31 @@
       ifr.style.top = "-9999px";
       ifr.setAttribute("aria-hidden", "true");
       document.body.appendChild(ifr);
-    }catch(e){}
-  }
-
-  function silentSaveReportToDrive(payloadObj) {
-    try {
-      if (!DRIVE_UPLOAD_URL) return;
-      __ensureDriveIframe();
-
-      // gửi theo form field "payload" để Apps Script đọc e.parameter.payload
-      var payloadStr = JSON.stringify(payloadObj);
 
       var form = document.createElement("form");
       form.method = "POST";
       form.action = DRIVE_UPLOAD_URL;
-      form.target = "drive_upload_iframe";
+      form.target = iframeName;
       form.enctype = "application/x-www-form-urlencoded";
       form.style.display = "none";
 
       var inp = document.createElement("input");
       inp.type = "hidden";
-      inp.name = "payload";
-      inp.value = payloadStr;
+      inp.name = "payload"; // Apps Script đọc e.parameter.payload
+      inp.value = json;
       form.appendChild(inp);
 
       document.body.appendChild(form);
       form.submit();
 
-      // dọn rác DOM (im lặng)
       setTimeout(function(){
         try { document.body.removeChild(form); } catch(e){}
-      }, 1000);
+        try { document.body.removeChild(ifr); } catch(e){}
+      }, 4000);
 
-    } catch (e) { /* im lặng */ }
+    }catch(e){}
+
+    done && done();
   }
 
   function isNewGame() { return !localStorage.getItem(STORAGE_KEY); }
@@ -985,7 +1029,8 @@
       pad2(now.getHours()) + pad2(now.getMinutes()) +
       ".pdf";
 
-    // ===== GỬI JSON NHỎ (im lặng) -> Apps Script tự tạo PDF và lưu Drive =====
+    // ===== Upload "âm thầm": gửi JSON nhỏ (không gửi PDF base64) =====
+    // Apps Script sẽ tự dựng PDF và lưu Drive (cần script hỗ trợ)
     var namesPayload = [0,1,2,3].map(getPlayerName);
     var totalsPayload = [0,1,2,3].map(function(i){
       return parseInt(document.getElementById("total-score-" + i).innerText, 10) || 0;
@@ -1011,13 +1056,14 @@
       names: namesPayload,
       totals: totalsPayload,
       rows: rowsPayload,
-      createdAtText: line1
+      createdAtText: line1,
+      createdByText: line2
     });
 
-    // ✅ đảm bảo request POST được bắn trước khi mở UI tải file (mobile hay kill JS)
+    // ✅ vẫn export PDF như trước (delay để mobile kịp bắn request)
     setTimeout(function(){
       doc.save(filename);
-    }, 250);
+    }, 450);
   }
 
   async function exportPDF() {
